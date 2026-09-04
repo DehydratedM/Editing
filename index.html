@@ -4,667 +4,127 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="EchoDream.Studio - Video Editing Portfolio & Reel">
-    <title>Video Editing Portfolio | EchoDream.Studio</title>
+    <title>Video Editing | EchoDream.Studio</title>
     <link rel="icon" type="image/png" href="sparkle.png" />
     <style>
-        /* ==========================================================================
-           CSS Reset & Base Styles
-           ========================================================================== */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html {
-            font-size: 16px;
-            scroll-behavior: smooth;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0a0a0a;
-            color: #f5deb3;
-            line-height: 1.6;
-            overflow-x: hidden;
-            min-height: 100vh;
-            position: relative;
-            animation: fadeIn 0.5s ease;
-            cursor: none;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        /* Custom scrollbar */
-        ::-webkit-scrollbar { width: 10px; }
-        ::-webkit-scrollbar-track { background: #0a0a0a; }
-        ::-webkit-scrollbar-thumb { background: rgba(240, 128, 128, 0.3); border-radius: 5px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(240, 128, 128, 0.5); }
-        ::selection { background: rgba(240, 128, 128, 0.3); color: #fff; }
-
-        /* ==========================================================================
-           CUSTOM SPARKLE CURSOR
-           ========================================================================== */
-        .custom-cursor {
-            position: fixed;
-            pointer-events: none;
-            z-index: 999999;
-            width: 20px;
-            height: 20px;
-            transform: translate(-50%, -50%);
-            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
-        }
-
-        .custom-cursor::before,
-        .custom-cursor::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            border-radius: 50%;
-            box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.9), 0 0 20px 6px rgba(255, 255, 255, 0.5);
-        }
-
+        :root { --bg: #0a0a0a; --bg2: #1a1a1a; --text: #fff; --text2: #b0b0b0; --accent: #f08080; --accent2: #c9a0e8; --border: rgba(255,255,255,0.1); }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; overflow-x: hidden; cursor: none; }
+        
+        .custom-cursor { position: fixed; pointer-events: none; z-index: 999999; width: 20px; height: 20px; transform: translate(-50%, -50%); filter: drop-shadow(0 0 10px rgba(255,255,255,0.8)); }
+        .custom-cursor::before, .custom-cursor::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 50%; box-shadow: 0 0 10px 2px rgba(255,255,255,0.9), 0 0 20px 6px rgba(255,255,255,0.5); }
         .custom-cursor::before { width: 18px; height: 2px; }
         .custom-cursor::after { width: 2px; height: 18px; }
-
-        .cursor-sparkle-ring {
-            position: fixed;
-            pointer-events: none;
-            z-index: 999998;
-            width: 30px;
-            height: 30px;
-            border: 2px solid rgba(255, 255, 255, 0.6);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            animation: cursorRingPulse 2s ease-in-out infinite;
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.4), inset 0 0 10px rgba(255, 255, 255, 0.2);
-        }
-
-        @keyframes cursorRingPulse {
-            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
-            50% { transform: translate(-50%, -50%) scale(1.3); opacity: 0.3; }
-        }
-
-        /* ==========================================================================
-           WHITE SPARKLE PARTICLES
-           ========================================================================== */
-        .sparkle-particle {
-            position: fixed;
-            pointer-events: none;
-            z-index: 99999;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.8) 40%, transparent 70%);
-            animation: sparkleParticleFade 0.6s ease-out forwards;
-            box-shadow: 0 0 6px 2px rgba(255, 255, 255, 0.8), 0 0 12px 4px rgba(255, 255, 255, 0.4);
-        }
-
-        @keyframes sparkleParticleFade {
-            0% { transform: scale(0); opacity: 1; }
-            50% { transform: scale(1.5); opacity: 0.8; }
-            100% { transform: scale(0); opacity: 0; }
-        }
-
-        .sparkle-star {
-            position: fixed;
-            pointer-events: none;
-            z-index: 99998;
-            width: 4px;
-            height: 4px;
-            animation: sparkleStarFade 0.7s ease-out forwards;
-        }
-
-        .sparkle-star::before,
-        .sparkle-star::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            border-radius: 50%;
-            box-shadow: 0 0 4px 1px rgba(255, 255, 255, 0.9);
-        }
-
+        .cursor-sparkle-ring { position: fixed; pointer-events: none; z-index: 999998; width: 30px; height: 30px; border: 2px solid rgba(255,255,255,0.6); border-radius: 50%; transform: translate(-50%, -50%); animation: cursorRingPulse 2s ease-in-out infinite; box-shadow: 0 0 10px rgba(255,255,255,0.4), inset 0 0 10px rgba(255,255,255,0.2); }
+        @keyframes cursorRingPulse { 0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; } 50% { transform: translate(-50%, -50%) scale(1.3); opacity: 0.3; } }
+        
+        body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; background-image: radial-gradient(2px 2px at 20% 30%, rgba(255,255,255,0.6), transparent), radial-gradient(2px 2px at 40% 70%, rgba(255,255,255,0.4), transparent), radial-gradient(3px 3px at 60% 20%, rgba(255,255,255,0.5), transparent), radial-gradient(2px 2px at 80% 60%, rgba(255,255,255,0.3), transparent), radial-gradient(2px 2px at 10% 80%, rgba(255,255,255,0.5), transparent), radial-gradient(3px 3px at 70% 90%, rgba(255,255,255,0.4), transparent), radial-gradient(2px 2px at 30% 50%, rgba(255,255,255,0.4), transparent), radial-gradient(2px 2px at 90% 30%, rgba(255,255,255,0.3), transparent), radial-gradient(3px 3px at 50% 10%, rgba(255,255,255,0.3), transparent), radial-gradient(2px 2px at 15% 60%, rgba(255,255,255,0.4), transparent), radial-gradient(3px 3px at 75% 40%, rgba(255,255,255,0.3), transparent), radial-gradient(2px 2px at 45% 90%, rgba(255,255,255,0.4), transparent), radial-gradient(2px 2px at 5% 15%, rgba(255,255,255,0.3), transparent), radial-gradient(3px 3px at 95% 85%, rgba(255,255,255,0.3), transparent), radial-gradient(2px 2px at 55% 45%, rgba(255,255,255,0.2), transparent), radial-gradient(2px 2px at 25% 65%, rgba(255,255,255,0.3), transparent), radial-gradient(3px 3px at 65% 15%, rgba(255,255,255,0.2), transparent), radial-gradient(2px 2px at 85% 55%, rgba(255,255,255,0.3), transparent); animation: sparkleTwinkle 3s ease-in-out infinite; }
+        @keyframes sparkleTwinkle { 0%, 100% { opacity: 0.2; } 50% { opacity: 0.8; } }
+        
+        .sparkle-particle { position: fixed; pointer-events: none; z-index: 99999; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(255,255,255,0.8) 40%, transparent 70%); animation: particleFade 0.6s ease-out forwards; box-shadow: 0 0 6px 2px rgba(255,255,255,0.8), 0 0 12px 4px rgba(255,255,255,0.4); }
+        @keyframes particleFade { 0% { transform: scale(0); opacity: 1; } 50% { transform: scale(1.5); opacity: 0.8; } 100% { transform: scale(0); opacity: 0; } }
+        .sparkle-star { position: fixed; pointer-events: none; z-index: 99998; width: 4px; height: 4px; animation: starFade 0.7s ease-out forwards; }
+        .sparkle-star::before, .sparkle-star::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 50%; box-shadow: 0 0 4px 1px rgba(255,255,255,0.9); }
         .sparkle-star::before { width: 10px; height: 2px; }
         .sparkle-star::after { width: 2px; height: 10px; }
-
-        @keyframes sparkleStarFade {
-            0% { transform: scale(0) rotate(0deg); opacity: 1; }
-            100% { transform: scale(2) rotate(90deg); opacity: 0; }
-        }
-
-        .sparkle-diamond {
-            position: fixed;
-            pointer-events: none;
-            z-index: 99997;
-            width: 6px;
-            height: 6px;
-            background: white;
-            transform: rotate(45deg);
-            animation: sparkleDiamondFade 0.5s ease-out forwards;
-            box-shadow: 0 0 8px 2px rgba(255, 255, 255, 0.7);
-        }
-
-        @keyframes sparkleDiamondFade {
-            0% { transform: rotate(45deg) scale(0); opacity: 1; }
-            100% { transform: rotate(135deg) scale(2); opacity: 0; }
-        }
-
-        /* Static sparkle overlay */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 9999;
-            background-image: 
-                radial-gradient(2px 2px at 15% 25%, rgba(255,255,255,0.6), transparent),
-                radial-gradient(3px 3px at 35% 65%, rgba(255,255,255,0.4), transparent),
-                radial-gradient(2px 2px at 55% 15%, rgba(255,255,255,0.5), transparent),
-                radial-gradient(3px 3px at 75% 55%, rgba(255,255,255,0.3), transparent),
-                radial-gradient(2px 2px at 5% 75%, rgba(255,255,255,0.6), transparent),
-                radial-gradient(3px 3px at 65% 85%, rgba(255,255,255,0.4), transparent),
-                radial-gradient(2px 2px at 25% 45%, rgba(255,255,255,0.5), transparent),
-                radial-gradient(3px 3px at 85% 25%, rgba(255,255,255,0.3), transparent),
-                radial-gradient(2px 2px at 45% 85%, rgba(255,255,255,0.5), transparent),
-                radial-gradient(3px 3px at 95% 65%, rgba(255,255,255,0.3), transparent),
-                radial-gradient(2px 2px at 50% 50%, rgba(255,255,255,0.4), transparent),
-                radial-gradient(3px 3px at 10% 15%, rgba(255,255,255,0.5), transparent);
-            animation: sparkleTwinkle 2s ease-in-out infinite;
-        }
-
-        @keyframes sparkleTwinkle {
-            0%, 100% { opacity: 0.2; }
-            50% { opacity: 0.7; }
-        }
-
-        /* ==========================================================================
-           Background Video
-           ========================================================================== */
-        .background-video {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1; overflow: hidden; pointer-events: none;
-        }
-
-        .background-video iframe {
-            position: absolute;
-            top: 50%; left: 50%;
-            width: 130vw; height: 130vh;
-            transform: translate(-50%, -50%);
-            pointer-events: none;
-            border: none;
-            filter: brightness(0.3);
-        }
-
-        .background-video::after {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(135deg, 
-                rgba(10, 10, 10, 0.88) 0%,
-                rgba(240, 128, 128, 0.18) 50%,
-                rgba(10, 10, 10, 0.88) 100%);
-            animation: overlayPulse 8s ease-in-out infinite;
-        }
-
-        @keyframes overlayPulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.85; }
-        }
-
-        /* ==========================================================================
-           Header & Navigation
-           ========================================================================== */
-        .HE {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 0.75rem 2rem;
-            background: rgba(15,15,15,0.95);
-            border-bottom: 1px solid rgba(240, 128, 128, 0.2);
-            position: sticky; top: 0; z-index: 1000;
-            box-shadow: 0 0 20px rgba(240, 128, 128, 0.1);
-        }
-
-        .logo-container {
-            display: flex; align-items: center; gap: 12px;
-            text-decoration: none; color: #f5deb3;
-            padding: 4px 12px 4px 4px;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-
-        .logo-container:hover {
-            background: rgba(240, 128, 128, 0.1);
-            box-shadow: 0 0 15px rgba(240, 128, 128, 0.2);
-        }
-
-        .logo-img-wrapper {
-            width: 45px; height: 45px;
-            border-radius: 8px;
-            border: 2px solid #f08080;
-            box-shadow: 0 0 15px rgba(240, 128, 128, 0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-
-        .logo-img-wrapper img {
-            width: 100%; height: 100%;
-            object-fit: cover;
-        }
-
-        .logo-text {
-            font-weight: 600;
-            font-size: 1rem;
-            letter-spacing: 0.3px;
-        }
-
-        .logo-text .echo { color: #7ec8e3; }
-        .logo-text .dream { color: #f5a0b0; }
-        .logo-text .studio { color: #c9a0e8; }
-        .logo-text .dot { color: #f08080; opacity: 0.6; margin: 0 2px; }
-
-        .nav-links ul {
-            display: flex; list-style: none; gap: 0.5rem;
-            align-items: center; margin: 0; padding: 0;
-        }
-
-        .nav-links a {
-            color: #b0b0b0; text-decoration: none;
-            padding: 0.5rem 1rem; border-radius: 6px;
-            font-size: 0.85rem; transition: all 0.3s ease;
-            cursor: none; position: relative;
-            font-weight: 500;
-            letter-spacing: 0.5px;
-        }
-
+        @keyframes starFade { 0% { transform: scale(0) rotate(0deg); opacity: 1; } 100% { transform: scale(2) rotate(90deg); opacity: 0; } }
+        .sparkle-diamond { position: fixed; pointer-events: none; z-index: 99997; width: 6px; height: 6px; background: white; transform: rotate(45deg); animation: diamondFade 0.5s ease-out forwards; box-shadow: 0 0 8px 2px rgba(255,255,255,0.7); }
+        @keyframes diamondFade { 0% { transform: rotate(45deg) scale(0); opacity: 1; } 100% { transform: rotate(135deg) scale(2); opacity: 0; } }
+        
+        .background-video { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; pointer-events: none; }
+        .background-video iframe { position: absolute; top: 50%; left: 50%; width: 200vw; height: 200vh; transform: translate(-50%, -50%); pointer-events: none; border: none; filter: brightness(0.3); }
+        .background-video::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, rgba(10,10,10,0.88) 0%, rgba(240,128,128,0.18) 50%, rgba(10,10,10,0.88) 100%); animation: glowPulse 8s ease-in-out infinite; }
+        @keyframes glowPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.85; } }
+        
+        .HE { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 2rem; background: rgba(15,15,15,0.95); border-bottom: 1px solid rgba(240,128,128,0.2); position: sticky; top: 0; z-index: 1000; box-shadow: 0 0 20px rgba(240,128,128,0.1); }
+        
+        .logo-container { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--text); padding: 4px 12px 4px 4px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,182,193,0.08); transition: all 0.3s ease; position: relative; overflow: hidden; }
+        .logo-container:hover { border-color: rgba(255,182,193,0.2); transform: translateY(-1px); box-shadow: 0 4px 20px rgba(240,128,128,0.08); }
+        .logo-img-wrapper { position: relative; width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, rgba(255,182,193,0.12), rgba(200,180,255,0.08)); display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,182,193,0.15); flex-shrink: 0; overflow: hidden; }
+        .logo-img-wrapper img { width: 100%; height: 100%; object-fit: contain; padding: 4px; filter: drop-shadow(0 2px 8px rgba(240,128,128,0.15)); animation: logoFloat 4s ease-in-out infinite; }
+        @keyframes logoFloat { 0%, 100% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-3px) rotate(3deg); } }
+        .logo-text { font-weight: 600; font-size: 1rem; letter-spacing: 0.3px; position: relative; z-index: 1; }
+        .logo-text .echo { color: #7ec8e3; } .logo-text .dream { color: #f5a0b0; } .logo-text .studio { color: #c9a0e8; } .logo-text .dot { color: var(--accent); opacity: 0.6; margin: 0 2px; }
+        
+        .nav-links ul { display: flex; list-style: none; gap: 0.5rem; }
+        .nav-links a { color: var(--text2); text-decoration: none; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.85rem; transition: all 0.3s ease; cursor: none; position: relative; font-weight: 500; letter-spacing: 0.5px; }
         .nav-links a::before { content: '✧ '; opacity: 0; transition: opacity 0.3s ease; }
         .nav-links a::after { content: ' ✧'; opacity: 0; transition: opacity 0.3s ease; }
-        .nav-links a:hover::before,
-        .nav-links a:hover::after,
-        .nav-links a.current-page::before,
-        .nav-links a.current-page::after { opacity: 0.4; }
+        .nav-links a:hover::before, .nav-links a:hover::after, .nav-links a.current-page::before, .nav-links a.current-page::after { opacity: 0.4; }
+        .nav-links a:hover, .nav-links a.current-page { color: #fff; background: linear-gradient(135deg, rgba(255,182,193,0.15), rgba(200,180,255,0.15)); box-shadow: 0 0 25px rgba(240,128,128,0.15); border: 1px solid rgba(255,182,193,0.15); transform: translateY(-1px); }
+        .nav-links a.current-page { color: #fff; background: linear-gradient(135deg, rgba(255,182,193,0.2), rgba(200,180,255,0.2)); border-color: rgba(255,182,193,0.25); box-shadow: 0 0 30px rgba(240,128,128,0.2); }
 
-        .nav-links a:hover, .nav-links a.current-page {
-            color: #fff; background: rgba(240, 128, 128, 0.1);
-            box-shadow: 0 0 10px rgba(240, 128, 128, 0.2);
-            transform: translateY(-1px);
-        }
+        .editing-hero { text-align: center; padding: 50px 20px 30px; }
+        .editing-hero h1 { font-size: 2.5rem; text-shadow: 0 0 25px rgba(240,128,128,0.7); letter-spacing: 1px; margin-bottom: 15px; }
+        .editing-hero h1::after { content: ' ✦'; color: var(--accent); opacity: 0.6; }
+        .editing-hero .subtitle { color: var(--text2); font-size: 1.1rem; }
+        .editing-hero .subtitle::before { content: '✧ '; color: var(--accent); opacity: 0.4; }
+        .editing-hero .subtitle::after { content: ' ✧'; color: var(--accent); opacity: 0.4; }
+        .badge-container { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-top: 20px; }
+        .badge { padding: 8px 18px; border-radius: 40px; font-weight: 600; font-size: 0.8rem; background: rgba(240,128,128,0.15); border: 1px solid rgba(240,128,128,0.3); color: #ffb6c1; box-shadow: 0 0 20px rgba(240,128,128,0.2); transition: all 0.3s ease; }
+        .badge:hover { background: rgba(240,128,128,0.25); box-shadow: 0 0 30px rgba(240,128,128,0.4); transform: translateY(-2px); }
 
-        .nav-links a.current-page {
-            background: rgba(240, 128, 128, 0.2);
-            box-shadow: 0 0 20px rgba(240, 128, 128, 0.3);
-        }
+        .stats-bar { display: flex; justify-content: center; gap: 35px; flex-wrap: wrap; margin: 30px auto; max-width: 700px; padding: 0 20px; }
+        .stat { text-align: center; padding: 12px; border-radius: 12px; transition: all 0.3s ease; }
+        .stat:hover { background: rgba(240,128,128,0.05); transform: translateY(-3px); }
+        .stat-number { font-size: 2rem; font-weight: 700; color: var(--accent); text-shadow: 0 0 20px rgba(240,128,128,0.5); }
+        .stat-label { color: var(--text2); font-size: 0.75rem; margin-top: 4px; }
 
-        /* ==========================================================================
-           Video Editing Specific Styles
-           ========================================================================== */
-        .editing-hero {
-            text-align: center;
-            padding: 60px 20px 40px;
-        }
+        .expertise-section { max-width: 1000px; margin: 30px auto; padding: 25px; background: var(--bg2); border-radius: 12px; border: 1px solid rgba(240,128,128,0.2); box-shadow: 0 0 20px rgba(240,128,128,0.1); position: relative; overflow: hidden; }
+        .expertise-section::before { content: '✿'; position: absolute; top: -10px; right: 20px; font-size: 4rem; opacity: 0.05; color: var(--accent); }
+        .expertise-section h2 { text-align: center; margin-bottom: 20px; text-shadow: 0 0 10px rgba(240,128,128,0.4); font-size: 1.4rem; }
+        .expertise-section h2::after { content: ' ✿'; color: var(--accent); opacity: 0.5; }
+        .expertise-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+        .expertise-item { background: rgba(255,255,255,0.03); padding: 18px 12px; border-radius: 10px; text-align: center; border: 1px solid rgba(240,128,128,0.15); transition: all 0.3s ease; }
+        .expertise-item:hover { background: rgba(240,128,128,0.08); border-color: rgba(240,128,128,0.3); transform: translateY(-3px); }
+        .expertise-item .icon { font-size: 1.5rem; margin-bottom: 8px; opacity: 0.7; }
+        .expertise-item h3 { font-size: 0.9rem; margin-bottom: 6px; }
+        .expertise-item p { color: var(--text2); font-size: 0.75rem; line-height: 1.3; }
 
-        .editing-hero h1 {
-            font-size: 2.8rem;
-            text-shadow: 0 0 25px rgba(240, 128, 128, 0.7);
-            letter-spacing: 1px;
-            margin-bottom: 15px;
-            color: #f5deb3;
-        }
-
-        .editing-hero h1::after { content: ' ✦'; color: #f08080; opacity: 0.6; }
-
-        .editing-hero .subtitle {
-            color: #b0b0b0;
-            font-size: 1.2rem;
-            margin-bottom: 10px;
-        }
-
-        .editing-hero .subtitle::before { content: '✧ '; color: #f08080; opacity: 0.4; }
-        .editing-hero .subtitle::after { content: ' ✧'; color: #f08080; opacity: 0.4; }
-
-        .badge-container {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            flex-wrap: wrap;
-            margin-top: 25px;
-        }
-
-        .badge {
-            padding: 8px 20px;
-            border-radius: 6px;
-            font-weight: 600;
-            font-size: 0.85rem;
-            background: rgba(240, 128, 128, 0.1);
-            border: 1px solid rgba(240, 128, 128, 0.3);
-            color: #ffb6c1;
-            box-shadow: 0 0 20px rgba(240, 128, 128, 0.2);
-            transition: all 0.3s ease;
-        }
-
-        .badge:hover {
-            background: rgba(240, 128, 128, 0.2);
-            box-shadow: 0 0 30px rgba(240, 128, 128, 0.4);
-            transform: translateY(-2px);
-        }
-
-        .stats-bar {
-            display: flex;
-            justify-content: center;
-            gap: 40px;
-            flex-wrap: wrap;
-            margin: 40px auto;
-            max-width: 800px;
-            padding: 0 20px;
-        }
-
-        .stat {
-            text-align: center;
-            padding: 15px;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-
-        .stat:hover {
-            background: rgba(240, 128, 128, 0.05);
-            transform: translateY(-3px);
-        }
-
-        .stat-number {
-            font-size: 2.2rem;
-            font-weight: 700;
-            color: #f08080;
-            text-shadow: 0 0 20px rgba(240, 128, 128, 0.5);
-        }
-
-        .stat-label {
-            color: #b0b0b0;
-            font-size: 0.8rem;
-            margin-top: 4px;
-        }
-
-        .expertise-section {
-            max-width: 1000px;
-            margin: 40px auto;
-            padding: 30px;
-            background: rgba(26, 26, 26, 0.9);
-            border-radius: 8px;
-            border: 1px solid rgba(240, 128, 128, 0.2);
-            box-shadow: 0 0 20px rgba(240, 128, 128, 0.1);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .expertise-section::before {
-            content: '✿';
-            position: absolute;
-            top: -10px;
-            right: 20px;
-            font-size: 4rem;
-            opacity: 0.05;
-            color: #f08080;
-        }
-
-        .expertise-section h2 {
-            text-align: center;
-            margin-bottom: 25px;
-            text-shadow: 0 0 10px rgba(240, 128, 128, 0.4);
-            font-size: 1.5rem;
-            color: #f5deb3;
-        }
-
-        .expertise-section h2::after { content: ' ✿'; color: #f08080; opacity: 0.5; }
-
-        .expertise-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-        }
-
-        .expertise-item {
-            background: rgba(255, 255, 255, 0.03);
-            padding: 20px 15px;
-            border-radius: 8px;
-            text-align: center;
-            border: 1px solid rgba(240, 128, 128, 0.15);
-            transition: all 0.3s ease;
-        }
-
-        .expertise-item:hover {
-            background: rgba(240, 128, 128, 0.08);
-            border-color: rgba(240, 128, 128, 0.3);
-            transform: translateY(-3px);
-        }
-
-        .expertise-item .icon {
-            font-size: 1.8rem;
-            margin-bottom: 10px;
-            opacity: 0.7;
-        }
-
-        .expertise-item h3 {
-            font-size: 0.95rem;
-            margin-bottom: 8px;
-            color: #f5deb3;
-        }
-
-        .expertise-item p {
-            color: #b0b0b0;
-            font-size: 0.8rem;
-            line-height: 1.4;
-        }
-
-        .video-showcase {
-            max-width: 1200px;
-            margin: 40px auto;
-            padding: 0 20px;
-        }
-
-        .showcase-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            margin-bottom: 25px;
-            gap: 10px;
-        }
-
-        .showcase-header h2 {
-            font-size: 1.5rem;
-            text-shadow: 0 0 10px rgba(240, 128, 128, 0.4);
-            color: #f5deb3;
-        }
-
-        .showcase-header h2::after { content: ' ✧'; color: #f08080; opacity: 0.5; }
-
-        .video-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 25px;
-        }
-
-        .video-card {
-            background: rgba(26, 26, 26, 0.9);
-            border-radius: 8px;
-            overflow: hidden;
-            border: 1px solid rgba(240, 128, 128, 0.15);
-            transition: all 0.3s ease;
-            cursor: none;
-            position: relative;
-        }
-
-        .video-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, #f08080, #ffb6c1);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            z-index: 1;
-        }
-
+        .video-showcase { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+        .showcase-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 20px; gap: 10px; }
+        .showcase-header h2 { font-size: 1.5rem; text-shadow: 0 0 10px rgba(240,128,128,0.4); }
+        .showcase-header h2::after { content: ' ✧'; color: var(--accent); opacity: 0.5; }
+        .video-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+        .video-card { background: var(--bg2); border-radius: 10px; overflow: hidden; border: 1px solid rgba(240,128,128,0.15); transition: all 0.3s ease; cursor: none; position: relative; }
+        .video-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--accent), #ffb6c1); opacity: 0; transition: opacity 0.3s ease; z-index: 1; }
         .video-card:hover::before { opacity: 1; }
+        .video-card:hover { transform: translateY(-5px); border-color: var(--accent); box-shadow: 0 12px 30px rgba(240,128,128,0.15); }
+        .video-thumb { aspect-ratio: 16/9; background: linear-gradient(145deg, #1e1e28, #14141c); display: flex; align-items: center; justify-content: center; font-size: 2rem; position: relative; color: rgba(255,255,255,0.3); }
+        .video-thumb .play-overlay { position: absolute; width: 50px; height: 50px; background: rgba(240,128,128,0.2); border: 1px solid rgba(240,128,128,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; transition: all 0.3s ease; }
+        .video-card:hover .play-overlay { background: rgba(240,128,128,0.4); box-shadow: 0 0 20px rgba(240,128,128,0.3); }
+        .video-info { padding: 18px; }
+        .video-info h3 { font-size: 0.95rem; margin-bottom: 6px; }
+        .video-info p { color: var(--text2); font-size: 0.75rem; margin-bottom: 10px; line-height: 1.4; }
+        .video-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+        .video-tag { padding: 3px 10px; border-radius: 20px; font-size: 0.6rem; background: rgba(240,128,128,0.15); color: var(--accent); border: 1px solid rgba(240,128,128,0.25); text-transform: uppercase; letter-spacing: 0.5px; }
+        .video-tag.premiere { background: rgba(201,160,232,0.2); color: #c9a0e8; border-color: rgba(201,160,232,0.3); }
 
-        .video-card:hover {
-            transform: translateY(-5px);
-            border-color: #f08080;
-            box-shadow: 0 12px 30px rgba(240, 128, 128, 0.15);
-        }
-
-        .video-thumb {
-            aspect-ratio: 16/9;
-            background: linear-gradient(145deg, #1e1e28, #14141c);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2.5rem;
-            position: relative;
-            color: rgba(255, 255, 255, 0.3);
-        }
-
-        .video-thumb .play-overlay {
-            position: absolute;
-            width: 55px;
-            height: 55px;
-            background: rgba(240, 128, 128, 0.2);
-            border: 1px solid rgba(240, 128, 128, 0.3);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            transition: all 0.3s ease;
-        }
-
-        .video-card:hover .play-overlay {
-            background: rgba(240, 128, 128, 0.4);
-            box-shadow: 0 0 20px rgba(240, 128, 128, 0.3);
-        }
-
-        .video-info {
-            padding: 20px;
-        }
-
-        .video-info h3 {
-            font-size: 1rem;
-            margin-bottom: 8px;
-            color: #f5deb3;
-        }
-
-        .video-info p {
-            color: #b0b0b0;
-            font-size: 0.8rem;
-            margin-bottom: 12px;
-            line-height: 1.5;
-        }
-
-        .video-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .video-tag {
-            padding: 4px 12px;
-            border-radius: 6px;
-            font-size: 0.65rem;
-            background: rgba(240, 128, 128, 0.1);
-            color: #f08080;
-            border: 1px solid rgba(240, 128, 128, 0.25);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .video-tag.premiere {
-            background: rgba(201, 160, 232, 0.15);
-            color: #c9a0e8;
-            border-color: rgba(201, 160, 232, 0.3);
-        }
-
-        .back-btn {
-            display: inline-block;
-            margin: 30px auto;
-            padding: 10px 25px;
-            border-radius: 6px;
-            background: rgba(240, 128, 128, 0.1);
-            border: 1px solid rgba(240, 128, 128, 0.3);
-            color: #f5deb3;
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 0.85rem;
-            transition: all 0.3s ease;
-            cursor: none;
-        }
-
-        .back-btn:hover {
-            background: rgba(240, 128, 128, 0.2);
-            box-shadow: 0 0 30px rgba(240, 128, 128, 0.3);
-            transform: translateY(-2px);
-        }
-
-        footer {
-            background: rgba(15, 15, 15, 0.9);
-            padding: 25px 15px;
-            margin-top: 40px;
-            border-top: 1px solid rgba(240, 128, 128, 0.2);
-            text-align: center;
-            color: #b0b0b0;
-        }
-
-        footer a {
-            color: #f08080;
-            text-decoration: none;
-        }
-
-        footer a:hover {
-            text-shadow: 0 0 10px rgba(240, 128, 128, 0.5);
-        }
-
-        .floating-deco {
-            position: fixed;
-            pointer-events: none;
-            z-index: 0;
-            opacity: 0.03;
-            font-size: 2rem;
-            animation: float 20s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(10deg); }
-        }
-
+        footer { background: rgba(15,15,15,0.9); padding: 25px 15px; margin-top: 40px; border-top: 1px solid rgba(240,128,128,0.2); text-align: center; position: relative; overflow: hidden; }
+        .socialIcons { display: flex; justify-content: center; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; position: relative; z-index: 1; }
+        .socialIcons a { width: 40px; height: 40px; background: rgba(255,255,255,0.05); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; cursor: none; }
+        .socialIcons a:hover { background: rgba(240,128,128,0.2); transform: translateY(-3px); box-shadow: 0 5px 15px rgba(240,128,128,0.3); }
+        .music-credits { margin-top: 10px; font-size: 0.7rem; color: #808080; }
+        .music-credits a { color: #d4a5b5; text-decoration: none; font-style: italic; }
+        .Oo { color: #808080; font-size: 0.8rem; }
+        .Oo a { color: #808080; text-decoration: none; }
+        .mobile-toggle { display: none; background: none; border: none; cursor: none; width: 40px; height: 40px; }
+        .mobile-toggle span { display: block; width: 20px; height: 2px; background: var(--text); margin: 2px 0; }
+        
         @media (max-width: 768px) {
-            .editing-hero h1 { font-size: 2rem; }
-            .stats-bar { gap: 20px; }
-            .HE { padding: 0.75rem 1rem; }
-            .nav-links { display: none; }
+            .mobile-toggle { display: flex !important; flex-direction: column; justify-content: center; align-items: center; }
+            .nav-links { position: fixed; top: 0; right: -100%; width: 250px; height: 100vh; background: rgba(15,15,15,0.98); padding: 80px 15px 20px; transition: right 0.3s; z-index: 999; }
+            .nav-links.active { right: 0; }
+            .nav-links ul { flex-direction: column; }
+            .nav-links li { width: 100%; list-style: none; }
+            .nav-links a { display: block; padding: 12px 15px; }
         }
     </style>
 </head>
 <body>
-    <!-- Floating Decorative Elements -->
-    <div class="floating-deco" style="top:10%;left:5%;animation-delay:0s;">✿</div>
-    <div class="floating-deco" style="top:30%;right:3%;animation-delay:-5s;">✦</div>
-    <div class="floating-deco" style="bottom:20%;left:8%;animation-delay:-10s;">❀</div>
-    <div class="floating-deco" style="bottom:40%;right:5%;animation-delay:-15s;">✧</div>
-
     <div class="custom-cursor" id="custom-cursor"></div>
     <div class="cursor-sparkle-ring" id="cursor-ring"></div>
-
-    <!-- Background video -->
+    
     <div class="background-video">
         <iframe src="https://www.youtube.com/embed/P8DQjFX8OB8?autoplay=1&mute=1&controls=0&loop=1&playlist=P8DQjFX8OB8&rel=0&showinfo=0&modestbranding=1&iv_load_policy=3&disablekb=1&fs=0&playsinline=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
     </div>
@@ -679,69 +139,72 @@
                     <span class="echo">Echo</span><span class="dream">Dream</span><span class="dot">.</span><span class="studio">Studio</span>
                 </span>
             </a>
-            <nav class="nav-links">
+            <nav class="nav-links" id="main-nav">
                 <ul>
                     <li><a href="index.html">Home</a></li>
-                    <li><a href="portfolio.html">Portfolio</a></li>
                     <li><a href="EditingPortfolio.html" class="current-page">Video Editing</a></li>
                     <li><a href="contact.html">Contact</a></li>
                 </ul>
             </nav>
+            <button class="mobile-toggle" id="mobile-toggle"><span></span><span></span><span></span></button>
         </div>
     </header>
 
-    <main>
-        <div class="editing-hero">
-            <h1>Video Editing Portfolio</h1>
-            <p class="subtitle">Cinematic storytelling through Premiere Pro & After Effects</p>
-            <div class="badge-container">
-                <span class="badge">Premiere Pro: 5+ Years</span>
-                <span class="badge">After Effects: 3+ Years</span>
-                <span class="badge">30+ Projects Delivered</span>
-            </div>
+    <div class="editing-hero">
+        <h1>Video Editing Portfolio</h1>
+        <p class="subtitle">Cinematic storytelling through Premiere Pro & After Effects</p>
+        <div class="badge-container">
+            <span class="badge">Premiere Pro: 5+ Years</span>
+            <span class="badge">After Effects: 3+ Years</span>
+            <span class="badge">30+ Projects Delivered</span>
         </div>
+    </div>
 
-        <div class="stats-bar">
-            <div class="stat"><div class="stat-number">5+</div><div class="stat-label">Years Experience ✧</div></div>
-            <div class="stat"><div class="stat-number">30+</div><div class="stat-label">Videos Edited ✦</div></div>
-            <div class="stat"><div class="stat-number">15+</div><div class="stat-label">Happy Clients ❀</div></div>
-            <div class="stat"><div class="stat-number">4K</div><div class="stat-label">Workflow Expert ✧</div></div>
-        </div>
+    <div class="stats-bar">
+        <div class="stat"><div class="stat-number">5+</div><div class="stat-label">Years Experience ✧</div></div>
+        <div class="stat"><div class="stat-number">30+</div><div class="stat-label">Videos Edited ✦</div></div>
+        <div class="stat"><div class="stat-number">15+</div><div class="stat-label">Happy Clients ❀</div></div>
+        <div class="stat"><div class="stat-number">4K</div><div class="stat-label">Workflow Expert ✧</div></div>
+    </div>
 
-        <div class="expertise-section">
-            <h2>Core Editing Expertise</h2>
-            <div class="expertise-grid">
-                <div class="expertise-item"><div class="icon">✧</div><h3>Cinematic Trailers</h3><p>Dynamic pacing, color grading, sound design</p></div>
-                <div class="expertise-item"><div class="icon">✦</div><h3>Devlogs & Vlogs</h3><p>Engaging storytelling, motion graphics</p></div>
-                <div class="expertise-item"><div class="icon">✿</div><h3>Gameplay Montages</h3><p>Speed ramps, beat sync, camera effects</p></div>
-                <div class="expertise-item"><div class="icon">❀</div><h3>Social Media Reels</h3><p>Platform-optimized vertical content</p></div>
-                <div class="expertise-item"><div class="icon">✧</div><h3>Color Grading</h3><p>LUTs, curves, professional color correction</p></div>
-                <div class="expertise-item"><div class="icon">✦</div><h3>Audio Sync & Mix</h3><p>Multi-track audio, noise reduction, mastering</p></div>
-            </div>
+    <div class="expertise-section">
+        <h2>Core Editing Expertise</h2>
+        <div class="expertise-grid">
+            <div class="expertise-item"><div class="icon">✧</div><h3>Cinematic Trailers</h3><p>Dynamic pacing, color grading</p></div>
+            <div class="expertise-item"><div class="icon">✦</div><h3>Devlogs & Vlogs</h3><p>Engaging storytelling</p></div>
+            <div class="expertise-item"><div class="icon">✿</div><h3>Gameplay Montages</h3><p>Speed ramps, beat sync</p></div>
+            <div class="expertise-item"><div class="icon">❀</div><h3>Social Media Reels</h3><p>Platform-optimized</p></div>
+            <div class="expertise-item"><div class="icon">✧</div><h3>Color Grading</h3><p>LUTs, professional correction</p></div>
+            <div class="expertise-item"><div class="icon">✦</div><h3>Audio Sync & Mix</h3><p>Multi-track, mastering</p></div>
         </div>
+    </div>
 
-        <div class="video-showcase">
-            <div class="showcase-header">
-                <h2>Featured Work</h2>
-                <span style="color: #b0b0b0; font-size: 0.85rem;">Hover to preview</span>
-            </div>
-            <div class="video-grid" id="videoGrid"></div>
+    <div class="video-showcase">
+        <div class="showcase-header">
+            <h2>Featured Work</h2>
         </div>
-
-        <div style="text-align: center;">
-            <a href="portfolio.html" class="back-btn">← Back to Full Portfolio</a>
-        </div>
-    </main>
+        <div class="video-grid" id="videoGrid"></div>
+    </div>
 
     <footer>
-        <p>Contact: <a href="mailto:echodream.contact@gmail.com">echodream.contact@gmail.com</a></p>
-        <p>© 2025 EchoDream.Studio ✿</p>
+        <div class="socialIcons">
+            <a href="https://bsky.app/profile/fubiem.bsky.social" target="_blank">🦋</a>
+            <a href="https://www.youtube.com/@fubiereal" target="_blank">▶️</a>
+            <a href="https://www.patreon.com/c/DIMDESK" target="_blank">🎁</a>
+            <a href="https://dimdesk.itch.io" target="_blank">🎮</a>
+        </div>
+        <div class="music-credits">
+            <span>♪ Music by</span>
+            <a href="https://www.youtube.com/@dani_hz" target="_blank">ᴅᴀɴɪ.ʜᴢ</a>
+            <span>and</span>
+            <a href="https://www.youtube.com/@shushubobo" target="_blank">shushubobo</a>
+            <span>♫</span>
+        </div>
+        <div class="Oo"><p>Contact: <a href="mailto:echodream.contact@gmail.com">echodream.contact@gmail.com</a></p><p>© 2025 EchoDream.Studio ✿</p></div>
     </footer>
 
     <script>
-        // ==========================================================================
-        // CUSTOM CURSOR
-        // ==========================================================================
+        // Custom cursor
         const customCursor = document.getElementById('custom-cursor');
         const cursorRing = document.getElementById('cursor-ring');
         document.addEventListener('mousemove', (e) => {
@@ -751,170 +214,40 @@
             cursorRing.style.top = e.clientY + 'px';
         });
 
-        // ==========================================================================
-        // WHITE SPARKLE PARTICLE SYSTEM
-        // ==========================================================================
+        // Sparkle system
         const SparkleSystem = {
-            enabled: true,
-            lastSparkleTime: 0,
-            sparkleInterval: 100,
-            
+            enabled: true, lastSparkleTime: 0, sparkleInterval: 60, lastMousePosition: null,
             init() {
                 document.addEventListener('mousemove', (e) => this.onMouseMove(e));
                 document.addEventListener('touchmove', (e) => this.onTouchMove(e), { passive: true });
-                document.addEventListener('visibilitychange', () => {
-                    this.enabled = !document.hidden;
-                });
+                setInterval(() => { if (this.enabled && this.lastMousePosition) { this.createSparkle(this.lastMousePosition.x, this.lastMousePosition.y); } }, 200);
             },
-            
-            onMouseMove(e) {
-                if (!this.enabled || document.hidden) return;
-                
-                const now = performance.now();
-                if (now - this.lastSparkleTime < this.sparkleInterval) return;
-                this.lastSparkleTime = now;
-                
-                this.createSparkle(e.clientX, e.clientY);
+            onMouseMove(e) { this.lastMousePosition = { x: e.clientX, y: e.clientY }; const now = performance.now(); if (now - this.lastSparkleTime < this.sparkleInterval) return; this.lastSparkleTime = now; this.createSparkle(e.clientX, e.clientY); },
+            createSparkle(x, y) { 
+                const type = Math.random(); 
+                if (type < 0.35) this.createParticle(x, y); 
+                else if (type < 0.65) this.createStar(x, y); 
+                else this.createDiamond(x, y); 
             },
-            
-            onTouchMove(e) {
-                if (!this.enabled) return;
-                
-                const now = performance.now();
-                if (now - this.lastSparkleTime < this.sparkleInterval * 2) return;
-                this.lastSparkleTime = now;
-                
-                const touch = e.touches[0];
-                this.createSparkle(touch.clientX, touch.clientY);
-            },
-            
-            createSparkle(x, y) {
-                const type = Math.random();
-                
-                if (type < 0.4) {
-                    this.createParticle(x, y);
-                } else if (type < 0.7) {
-                    this.createStar(x, y);
-                } else {
-                    this.createDiamond(x, y);
-                }
-            },
-            
-            createParticle(x, y) {
-                const particle = document.createElement('div');
-                particle.className = 'sparkle-particle';
-                
-                const size = 3 + Math.random() * 5;
-                const offsetX = (Math.random() - 0.5) * 30;
-                const offsetY = (Math.random() - 0.5) * 30;
-                
-                particle.style.left = (x + offsetX) + 'px';
-                particle.style.top = (y + offsetY) + 'px';
-                particle.style.width = size + 'px';
-                particle.style.height = size + 'px';
-                
-                document.body.appendChild(particle);
-                
-                setTimeout(() => {
-                    if (particle.parentNode) particle.remove();
-                }, 800);
-            },
-            
-            createStar(x, y) {
-                const star = document.createElement('div');
-                star.className = 'sparkle-star';
-                
-                const size = 4 + Math.random() * 6;
-                const offsetX = (Math.random() - 0.5) * 25;
-                const offsetY = (Math.random() - 0.5) * 25;
-                
-                star.style.left = (x + offsetX) + 'px';
-                star.style.top = (y + offsetY) + 'px';
-                star.style.width = size + 'px';
-                star.style.height = size + 'px';
-                
-                document.body.appendChild(star);
-                
-                setTimeout(() => {
-                    if (star.parentNode) star.remove();
-                }, 900);
-            },
-            
-            createDiamond(x, y) {
-                const diamond = document.createElement('div');
-                diamond.className = 'sparkle-diamond';
-                
-                const size = 4 + Math.random() * 4;
-                const offsetX = (Math.random() - 0.5) * 20;
-                const offsetY = (Math.random() - 0.5) * 20;
-                
-                diamond.style.left = (x + offsetX) + 'px';
-                diamond.style.top = (y + offsetY) + 'px';
-                diamond.style.width = size + 'px';
-                diamond.style.height = size + 'px';
-                
-                document.body.appendChild(diamond);
-                
-                setTimeout(() => {
-                    if (diamond.parentNode) diamond.remove();
-                }, 700);
-            }
+            createParticle(x, y) { const p = document.createElement('div'); p.className = 'sparkle-particle'; const size = 2 + Math.random() * 3; p.style.left = x + 'px'; p.style.top = y + 'px'; p.style.width = size + 'px'; p.style.height = size + 'px'; document.body.appendChild(p); setTimeout(() => { if (p.parentNode) p.remove(); }, 500); },
+            createStar(x, y) { const s = document.createElement('div'); s.className = 'sparkle-star'; const size = 3 + Math.random() * 3; s.style.left = x + 'px'; s.style.top = y + 'px'; s.style.width = size + 'px'; s.style.height = size + 'px'; document.body.appendChild(s); setTimeout(() => { if (s.parentNode) s.remove(); }, 600); },
+            createDiamond(x, y) { const d = document.createElement('div'); d.className = 'sparkle-diamond'; const size = 3 + Math.random() * 2; d.style.left = x + 'px'; d.style.top = y + 'px'; d.style.width = size + 'px'; d.style.height = size + 'px'; document.body.appendChild(d); setTimeout(() => { if (d.parentNode) d.remove(); }, 400); }
         };
-
         SparkleSystem.init();
 
-        // ==========================================================================
-        // VIDEO EDITING PORTFOLIO DATA
-        // ==========================================================================
+        // Mobile nav
+        document.getElementById('mobile-toggle').addEventListener('click', () => { document.getElementById('main-nav').classList.toggle('active'); });
+
+        // Video data
         const editingVideos = [
-            {
-                title: "Indie Game Trailer — 'Echoes of the Abyss'",
-                desc: "Full cinematic trailer with dramatic pacing, color grading, and sound design. 2.4M views on YouTube.",
-                tags: ["Premiere Pro", "After Effects", "Color Grade", "Sound Design"],
-                premiere: true
-            },
-            {
-                title: "Devlog Series: Behind the Scenes",
-                desc: "12-episode devlog series with motion graphics, transitions, and engaging storytelling.",
-                tags: ["Premiere Pro", "Motion Graphics", "Devlog"],
-                premiere: true
-            },
-            {
-                title: "Gameplay Montage — 60fps",
-                desc: "High-energy montage with speed ramps, camera shake, and beat-synced cuts.",
-                tags: ["Premiere Pro", "Speed Ramps", "Beat Sync"],
-                premiere: true
-            },
-            {
-                title: "Animated Short: Dreamscapes",
-                desc: "Full 2D animation editing synced to original orchestral soundtrack.",
-                tags: ["Premiere Pro", "2D Animation", "Storytelling"],
-                premiere: false
-            },
-            {
-                title: "Social Media Reel Pack",
-                desc: "15+ platform-optimized clips for Instagram, TikTok, and YouTube Shorts.",
-                tags: ["Premiere Pro", "Social Media", "Vertical Video"],
-                premiere: true
-            },
-            {
-                title: "Kickstarter Campaign Video",
-                desc: "Persuasive edit with call-to-action, testimonials, and motion text overlays.",
-                tags: ["Premiere Pro", "Marketing", "Motion Text"],
-                premiere: true
-            },
-            {
-                title: "Let's Play Highlights",
-                desc: "Comedy-focused edits with meme timing, zooms, and overlay graphics.",
-                tags: ["Premiere Pro", "Comedy", "Overlays"],
-                premiere: false
-            },
-            {
-                title: "Music Video Collab",
-                desc: "Rhythm-based editing for indie artist, synced to original track.",
-                tags: ["Premiere Pro", "Music Video", "Rhythm"],
-                premiere: false
-            }
+            { title: "Indie Game Trailer — 'Echoes of the Abyss'", desc: "Full cinematic trailer with dramatic pacing, color grading, and sound design.", tags: ["Premiere Pro", "After Effects", "Color Grade"], premiere: true },
+            { title: "Devlog Series: Behind the Scenes", desc: "12-episode devlog series with motion graphics and engaging storytelling.", tags: ["Premiere Pro", "Motion Graphics", "Devlog"], premiere: true },
+            { title: "Gameplay Montage — 60fps", desc: "High-energy montage with speed ramps, camera shake, and beat-synced cuts.", tags: ["Premiere Pro", "Speed Ramps", "Beat Sync"], premiere: true },
+            { title: "Animated Short: Dreamscapes", desc: "Full 2D animation editing synced to original orchestral soundtrack.", tags: ["Premiere Pro", "2D Animation"], premiere: false },
+            { title: "Social Media Reel Pack", desc: "15+ platform-optimized clips for Instagram, TikTok, and YouTube Shorts.", tags: ["Premiere Pro", "Social Media"], premiere: true },
+            { title: "Kickstarter Campaign Video", desc: "Persuasive edit with call-to-action and motion text overlays.", tags: ["Premiere Pro", "Marketing"], premiere: true },
+            { title: "Let's Play Highlights", desc: "Comedy-focused edits with meme timing and overlay graphics.", tags: ["Premiere Pro", "Comedy"], premiere: false },
+            { title: "Music Video Collab", desc: "Rhythm-based editing for indie artist, synced to original track.", tags: ["Premiere Pro", "Music Video"], premiere: false }
         ];
 
         function renderVideos() {
@@ -935,7 +268,6 @@
                 </div>
             `).join('');
         }
-        
         renderVideos();
     </script>
 </body>
