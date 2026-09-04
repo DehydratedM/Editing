@@ -289,7 +289,7 @@
         <div class="Oo"><p>Contact: <a href="mailto:echodream.contact@gmail.com">echodream.contact@gmail.com</a></p><p>© 2025 EchoDream.Studio ✿</p></div>
     </footer>
 
-  <script src="https://www.youtube.com/iframe_api"></script>
+<script src="https://www.youtube.com/iframe_api"></script>
 <script>
     // ============================================================
     // GLOBAL VARIABLES FOR SOUND SYSTEM
@@ -304,14 +304,8 @@
     let clickAudioContext = null;
     let userVolume = 70;
 
-    // Use individual video IDs instead of playlist ID
-    const BGM_VIDEOS = [
-        'jfKfPfyJRdk', // lofi hip hop radio
-        '5qap5aO4i9A', // lofi girl
-        'DWcJFNfaw9c', // lofi beats
-        '4xDzrJKXOOY', // synthwave radio
-        'n61ULEU7CO0', // lofi sleep
-    ];
+    // Your YouTube Playlist ID
+    const PLAYLIST_ID = 'PLBhmJvLFkdXI';
 
     const savedVolume = localStorage.getItem('echodream_volume');
     if (savedVolume !== null) userVolume = parseInt(savedVolume);
@@ -333,13 +327,15 @@
         youtubePlayer = new YT.Player('youtube-bgm-player', {
             height: '1',
             width: '1',
-            videoId: BGM_VIDEOS[currentVideoIndex],
             playerVars: {
                 autoplay: 0,
                 controls: 0,
                 disablekb: 1,
                 fs: 0,
                 iv_load_policy: 3,
+                listType: 'playlist',
+                list: PLAYLIST_ID,
+                index: savedVideoIndex,
                 loop: 1,
                 modestbranding: 1,
                 rel: 0,
@@ -363,6 +359,13 @@
         
         document.getElementById('volume-slider').value = userVolume;
         document.getElementById('volume-display').textContent = userVolume + '%';
+        
+        try {
+            playlistVideos = event.target.getPlaylist();
+            console.log('Playlist loaded:', playlistVideos.length, 'videos');
+        } catch(e) {
+            console.log('Could not get playlist:', e);
+        }
         
         if (savedVideoTime > 1) {
             pendingSeekTime = savedVideoTime;
@@ -432,44 +435,64 @@
         if (event.data === YT.PlayerState.PAUSED) {
             savePlaybackPosition();
         }
+        
+        if (event.data === YT.PlayerState.CUED) {
+            savePlaybackPosition();
+        }
     }
 
     function playNextVideo() {
-        currentVideoIndex = (currentVideoIndex + 1) % BGM_VIDEOS.length;
-        localStorage.setItem('echodream_bgm_index', currentVideoIndex.toString());
-        localStorage.setItem('echodream_bgm_time', '0');
+        if (!youtubePlayer || !isPlayerReady) return;
         
-        if (youtubePlayer && isPlayerReady) {
-            youtubePlayer.loadVideoById(BGM_VIDEOS[currentVideoIndex]);
-            youtubePlayer.playVideo();
-            console.log('Playing next video:', BGM_VIDEOS[currentVideoIndex]);
+        try {
+            currentVideoIndex = (currentVideoIndex + 1) % playlistVideos.length;
+            localStorage.setItem('echodream_bgm_index', currentVideoIndex.toString());
+            localStorage.setItem('echodream_bgm_time', '0');
+            
+            youtubePlayer.nextVideo();
+            console.log('Playing next video');
+        } catch(e) {
+            console.log('Error playing next:', e);
         }
     }
 
     function playRandomVideo() {
         if (!youtubePlayer || !isPlayerReady) return;
         
-        let randomIndex;
-        do {
-            randomIndex = Math.floor(Math.random() * BGM_VIDEOS.length);
-        } while (randomIndex === currentVideoIndex && BGM_VIDEOS.length > 1);
-        
-        currentVideoIndex = randomIndex;
-        localStorage.setItem('echodream_bgm_index', randomIndex.toString());
-        localStorage.setItem('echodream_bgm_time', '0');
-        
-        youtubePlayer.loadVideoById(BGM_VIDEOS[randomIndex]);
-        youtubePlayer.playVideo();
-        console.log('Playing random video:', BGM_VIDEOS[randomIndex]);
+        try {
+            if (playlistVideos && playlistVideos.length > 1) {
+                let randomIndex;
+                do {
+                    randomIndex = Math.floor(Math.random() * playlistVideos.length);
+                } while (randomIndex === currentVideoIndex && playlistVideos.length > 1);
+                
+                currentVideoIndex = randomIndex;
+                localStorage.setItem('echodream_bgm_index', randomIndex.toString());
+                localStorage.setItem('echodream_bgm_time', '0');
+                
+                youtubePlayer.playVideoAt(randomIndex);
+                console.log('Playing random video at index:', randomIndex);
+            } else {
+                youtubePlayer.nextVideo();
+            }
+        } catch(e) {
+            console.log('Shuffle error:', e);
+            youtubePlayer.nextVideo();
+        }
     }
 
     function savePlaybackPosition() {
         if (youtubePlayer && isPlayerReady) {
             try {
                 const currentTime = youtubePlayer.getCurrentTime();
+                const currentIndex = youtubePlayer.getPlaylistIndex();
                 
                 if (currentTime > 0.5) {
                     localStorage.setItem('echodream_bgm_time', currentTime.toString());
+                }
+                if (currentIndex >= 0) {
+                    localStorage.setItem('echodream_bgm_index', currentIndex.toString());
+                    currentVideoIndex = currentIndex;
                 }
             } catch(e) {}
         }
