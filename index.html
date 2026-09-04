@@ -521,380 +521,394 @@
             };
             SparkleSystem.init();
 
-            // ============================================================
-            // COMPLETE SOUND SYSTEM (from contact.html with playlist support)
-            // ============================================================
-            let youtubePlayer = null;
-            let bgmEnabled = true;
-            let shuffleEnabled = false;
-            let isPlayerReady = false;
-            let isSeekingComplete = false;
-            let pendingSeekTime = 0;
-            let playlistVideos = [];
-            let currentVideoIndex = 0;
-            let clickAudioContext = null;
-            let userVolume = 70;
+         // ============================================================
+// SOUND SYSTEM JAVASCRIPT - Add this to your <script> block
+// ============================================================
+let youtubePlayer = null;
+let bgmEnabled = true;
+let shuffleEnabled = false;
+let isPlayerReady = false;
+let isSeekingComplete = false;
+let pendingSeekTime = 0;
+let playlistVideos = [];
+let currentVideoIndex = 0;
+let clickAudioContext = null;
+let userVolume = 70;
 
-            const PLAYLIST_ID = 'PLUmFF7Wbo1Gw';
+const PLAYLIST_ID = 'PLUmFF7Wbo1Gw'; // Replace with your YouTube playlist ID
 
-            const savedVolume = localStorage.getItem('echodream_volume');
-            if (savedVolume !== null) userVolume = parseInt(savedVolume);
+const savedVolume = localStorage.getItem('echodream_volume');
+if (savedVolume !== null) userVolume = parseInt(savedVolume);
 
-            const savedSoundState = localStorage.getItem('echodream_sound_enabled');
-            if (savedSoundState !== null) bgmEnabled = savedSoundState === 'true';
+const savedSoundState = localStorage.getItem('echodream_sound_enabled');
+if (savedSoundState !== null) bgmEnabled = savedSoundState === 'true';
 
-            const savedShuffleState = localStorage.getItem('echodream_shuffle_enabled');
-            if (savedShuffleState !== null) shuffleEnabled = savedShuffleState === 'true';
+const savedShuffleState = localStorage.getItem('echodream_shuffle_enabled');
+if (savedShuffleState !== null) shuffleEnabled = savedShuffleState === 'true';
 
-            const savedVideoTime = parseFloat(localStorage.getItem('echodream_bgm_time') || '0');
-            const savedVideoIndex = parseInt(localStorage.getItem('echodream_bgm_index') || '0');
-            currentVideoIndex = savedVideoIndex;
+const savedVideoTime = parseFloat(localStorage.getItem('echodream_bgm_time') || '0');
+const savedVideoIndex = parseInt(localStorage.getItem('echodream_bgm_index') || '0');
+currentVideoIndex = savedVideoIndex;
 
-            function onYouTubeIframeAPIReady() {
-                youtubePlayer = new YT.Player('youtube-bgm-player', {
-                    height: '1',
-                    width: '1',
-                    playerVars: {
-                        autoplay: 0,
-                        controls: 0,
-                        disablekb: 1,
-                        fs: 0,
-                        iv_load_policy: 3,
-                        listType: 'playlist',
-                        list: PLAYLIST_ID,
-                        index: savedVideoIndex,
-                        loop: 1,
-                        modestbranding: 1,
-                        rel: 0,
-                        showinfo: 0,
-                        volume: Math.round(userVolume / 100 * 100)
-                    },
-                    events: {
-                        onReady: onPlayerReady,
-                        onStateChange: onPlayerStateChange
-                    }
-                });
+function onYouTubeIframeAPIReady() {
+    youtubePlayer = new YT.Player('youtube-bgm-player', {
+        height: '1',
+        width: '1',
+        playerVars: {
+            autoplay: 0,
+            controls: 0,
+            disablekb: 1,
+            fs: 0,
+            iv_load_policy: 3,
+            listType: 'playlist',
+            list: PLAYLIST_ID,
+            index: savedVideoIndex,
+            loop: 1,
+            modestbranding: 1,
+            rel: 0,
+            showinfo: 0,
+            volume: Math.round(userVolume / 100 * 100)
+        },
+        events: {
+            onReady: onPlayerReady,
+            onStateChange: onPlayerStateChange
+        }
+    });
+}
+
+function onPlayerReady(event) {
+    isPlayerReady = true;
+    applySoundState();
+    applyShuffleState();
+    
+    const vol = Math.round(userVolume / 100 * 100);
+    event.target.setVolume(vol);
+    
+    document.getElementById('volume-slider').value = userVolume;
+    document.getElementById('volume-display').textContent = userVolume + '%';
+    
+    try {
+        playlistVideos = event.target.getPlaylist();
+        console.log('Playlist loaded:', playlistVideos.length, 'videos');
+    } catch(e) {
+        console.log('Could not get playlist:', e);
+    }
+    
+    if (savedVideoTime > 1) {
+        pendingSeekTime = savedVideoTime;
+    }
+    
+    if (bgmEnabled && !document.hidden) {
+        setTimeout(() => {
+            if (youtubePlayer && bgmEnabled) {
+                youtubePlayer.unMute();
+                youtubePlayer.playVideo();
             }
+        }, 2000);
+    } else {
+        event.target.pauseVideo();
+        event.target.mute();
+    }
+    
+    document.getElementById('shuffle-toggle').style.display = 'flex';
+    
+    setInterval(() => {
+        if (bgmEnabled && !document.hidden && isPlayerReady) {
+            savePlaybackPosition();
+        }
+    }, 2000);
+}
 
-            function onPlayerReady(event) {
-                isPlayerReady = true;
-                applySoundState();
-                applyShuffleState();
-                
-                const vol = Math.round(userVolume / 100 * 100);
-                event.target.setVolume(vol);
-                
-                document.getElementById('volume-slider').value = userVolume;
-                document.getElementById('volume-display').textContent = userVolume + '%';
-                
+function onPlayerStateChange(event) {
+    if (event.data === YT.PlayerState.PLAYING) {
+        isSeekingComplete = false;
+        
+        if (pendingSeekTime > 0 && !isSeekingComplete) {
+            setTimeout(() => {
                 try {
-                    playlistVideos = event.target.getPlaylist();
-                    console.log('Playlist loaded:', playlistVideos.length, 'videos');
-                } catch(e) {
-                    console.log('Could not get playlist:', e);
-                }
-                
-                if (savedVideoTime > 1) {
-                    pendingSeekTime = savedVideoTime;
-                }
-                
-                if (bgmEnabled && !document.hidden) {
-                    setTimeout(() => {
-                        if (youtubePlayer && bgmEnabled) {
-                            youtubePlayer.unMute();
-                            youtubePlayer.playVideo();
-                        }
-                    }, 2000);
-                } else {
-                    event.target.pauseVideo();
-                    event.target.mute();
-                }
-                
-                document.getElementById('shuffle-toggle').style.display = 'flex';
-                
-                setInterval(() => {
-                    if (bgmEnabled && !document.hidden && isPlayerReady) {
-                        savePlaybackPosition();
+                    if (youtubePlayer && pendingSeekTime > 0) {
+                        youtubePlayer.seekTo(pendingSeekTime, true);
+                        pendingSeekTime = 0;
+                        isSeekingComplete = true;
                     }
-                }, 2000);
+                } catch(e) {}
+            }, 800);
+        }
+        
+        if (document.hidden || !bgmEnabled) {
+            event.target.pauseVideo();
+        }
+    }
+    
+    if (event.data === YT.PlayerState.ENDED) {
+        localStorage.setItem('echodream_bgm_time', '0');
+        pendingSeekTime = 0;
+        
+        if (bgmEnabled && !document.hidden) {
+            if (shuffleEnabled) {
+                setTimeout(() => {
+                    playRandomVideo();
+                }, 500);
+            } else {
+                setTimeout(() => {
+                    event.target.nextVideo();
+                }, 500);
             }
+        } else {
+            event.target.pauseVideo();
+        }
+    }
+    
+    if (event.data === YT.PlayerState.PAUSED) {
+        savePlaybackPosition();
+    }
+    
+    if (event.data === YT.PlayerState.CUED) {
+        savePlaybackPosition();
+        isSeekingComplete = false;
+    }
+}
 
-            function onPlayerStateChange(event) {
-                if (event.data === YT.PlayerState.PLAYING) {
-                    isSeekingComplete = false;
-                    
-                    if (pendingSeekTime > 0 && !isSeekingComplete) {
-                        setTimeout(() => {
-                            try {
-                                if (youtubePlayer && pendingSeekTime > 0) {
-                                    youtubePlayer.seekTo(pendingSeekTime, true);
-                                    pendingSeekTime = 0;
-                                    isSeekingComplete = true;
-                                }
-                            } catch(e) {}
-                        }, 800);
-                    }
-                    
-                    if (document.hidden || !bgmEnabled) {
-                        event.target.pauseVideo();
-                    }
-                }
-                
-                if (event.data === YT.PlayerState.ENDED) {
-                    localStorage.setItem('echodream_bgm_time', '0');
-                    pendingSeekTime = 0;
-                    
-                    if (bgmEnabled && !document.hidden) {
-                        if (shuffleEnabled) {
-                            setTimeout(() => {
-                                playRandomVideo();
-                            }, 500);
-                        } else {
-                            setTimeout(() => {
-                                event.target.nextVideo();
-                            }, 500);
-                        }
-                    } else {
-                        event.target.pauseVideo();
-                    }
-                }
-                
-                if (event.data === YT.PlayerState.PAUSED) {
-                    savePlaybackPosition();
-                }
-                
-                if (event.data === YT.PlayerState.CUED) {
-                    savePlaybackPosition();
-                    isSeekingComplete = false;
-                }
+function playRandomVideo() {
+    if (!youtubePlayer || !isPlayerReady) return;
+    
+    try {
+        if (playlistVideos && playlistVideos.length > 1) {
+            let randomIndex;
+            do {
+                randomIndex = Math.floor(Math.random() * playlistVideos.length);
+            } while (randomIndex === currentVideoIndex && playlistVideos.length > 1);
+            
+            currentVideoIndex = randomIndex;
+            localStorage.setItem('echodream_bgm_index', randomIndex.toString());
+            localStorage.setItem('echodream_bgm_time', '0');
+            
+            youtubePlayer.playVideoAt(randomIndex);
+            console.log('Playing random video at index:', randomIndex);
+        } else {
+            youtubePlayer.nextVideo();
+        }
+    } catch(e) {
+        console.log('Shuffle error:', e);
+        youtubePlayer.nextVideo();
+    }
+}
+
+function savePlaybackPosition() {
+    if (youtubePlayer && isPlayerReady) {
+        try {
+            const currentTime = youtubePlayer.getCurrentTime();
+            const currentIndex = youtubePlayer.getPlaylistIndex();
+            
+            if (currentTime > 0.5) {
+                localStorage.setItem('echodream_bgm_time', currentTime.toString());
             }
-
-            function playRandomVideo() {
-                if (!youtubePlayer || !isPlayerReady) return;
-                
-                try {
-                    if (playlistVideos && playlistVideos.length > 1) {
-                        let randomIndex;
-                        do {
-                            randomIndex = Math.floor(Math.random() * playlistVideos.length);
-                        } while (randomIndex === currentVideoIndex && playlistVideos.length > 1);
-                        
-                        currentVideoIndex = randomIndex;
-                        localStorage.setItem('echodream_bgm_index', randomIndex.toString());
-                        localStorage.setItem('echodream_bgm_time', '0');
-                        
-                        youtubePlayer.playVideoAt(randomIndex);
-                        console.log('Playing random video at index:', randomIndex);
-                    } else {
-                        youtubePlayer.nextVideo();
-                    }
-                } catch(e) {
-                    console.log('Shuffle error:', e);
-                    youtubePlayer.nextVideo();
-                }
+            if (currentIndex >= 0) {
+                localStorage.setItem('echodream_bgm_index', currentIndex.toString());
+                currentVideoIndex = currentIndex;
             }
+        } catch(e) {}
+    }
+}
 
-            function savePlaybackPosition() {
-                if (youtubePlayer && isPlayerReady) {
-                    try {
-                        const currentTime = youtubePlayer.getCurrentTime();
-                        const currentIndex = youtubePlayer.getPlaylistIndex();
-                        
-                        if (currentTime > 0.5) {
-                            localStorage.setItem('echodream_bgm_time', currentTime.toString());
-                        }
-                        if (currentIndex >= 0) {
-                            localStorage.setItem('echodream_bgm_index', currentIndex.toString());
-                            currentVideoIndex = currentIndex;
-                        }
-                    } catch(e) {}
-                }
+function applySoundState() {
+    const soundIconOn = document.getElementById('sound-icon-on');
+    const soundIconOff = document.getElementById('sound-icon-off');
+    
+    if (bgmEnabled) {
+        if (soundIconOn) soundIconOn.style.display = 'block';
+        if (soundIconOff) soundIconOff.style.display = 'none';
+    } else {
+        if (soundIconOn) soundIconOn.style.display = 'none';
+        if (soundIconOff) soundIconOff.style.display = 'block';
+    }
+}
+
+function applyShuffleState() {
+    const shuffleBtn = document.getElementById('shuffle-toggle');
+    if (shuffleBtn) {
+        if (shuffleEnabled) {
+            shuffleBtn.classList.add('active');
+        } else {
+            shuffleBtn.classList.remove('active');
+        }
+    }
+}
+
+// Initialize controls
+document.addEventListener('DOMContentLoaded', function() {
+    const volumeSlider = document.getElementById('volume-slider');
+    const volumeDisplay = document.getElementById('volume-display');
+    const volumeContainer = document.getElementById('volume-slider-container');
+    const soundWrapper = document.getElementById('sound-wrapper');
+    const shuffleBtn = document.getElementById('shuffle-toggle');
+
+    let hoverTimeout;
+
+    soundWrapper.addEventListener('mouseenter', function() {
+        clearTimeout(hoverTimeout);
+        volumeContainer.classList.add('visible');
+        shuffleBtn.classList.add('visible');
+    });
+    soundWrapper.addEventListener('mouseleave', function() {
+        hoverTimeout = setTimeout(() => {
+            volumeContainer.classList.remove('visible');
+            shuffleBtn.classList.remove('visible');
+        }, 800);
+    });
+
+    volumeSlider.addEventListener('mouseenter', function() {
+        clearTimeout(hoverTimeout);
+        volumeContainer.classList.add('visible');
+        shuffleBtn.classList.add('visible');
+    });
+    volumeSlider.addEventListener('mouseleave', function() {
+        hoverTimeout = setTimeout(() => {
+            volumeContainer.classList.remove('visible');
+            shuffleBtn.classList.remove('visible');
+        }, 800);
+    });
+
+    shuffleBtn.addEventListener('mouseenter', function() {
+        clearTimeout(hoverTimeout);
+        shuffleBtn.classList.add('visible');
+    });
+    shuffleBtn.addEventListener('mouseleave', function() {
+        hoverTimeout = setTimeout(() => {
+            shuffleBtn.classList.remove('visible');
+        }, 800);
+    });
+
+    volumeSlider.addEventListener('input', function() {
+        const val = parseInt(this.value);
+        userVolume = val;
+        volumeDisplay.textContent = val + '%';
+        localStorage.setItem('echodream_volume', val);
+        if (youtubePlayer && isPlayerReady) {
+            youtubePlayer.setVolume(Math.round(val / 100 * 100));
+        }
+    });
+
+    document.getElementById('sound-toggle').addEventListener('click', function(e) {
+        e.stopPropagation();
+        bgmEnabled = !bgmEnabled;
+        localStorage.setItem('echodream_sound_enabled', bgmEnabled);
+        applySoundState();
+        
+        if (youtubePlayer) {
+            if (bgmEnabled && !document.hidden) {
+                youtubePlayer.unMute();
+                youtubePlayer.setVolume(Math.round(userVolume / 100 * 100));
+                youtubePlayer.playVideo();
+            } else {
+                youtubePlayer.pauseVideo();
+                youtubePlayer.mute();
+                savePlaybackPosition();
             }
+        }
+    });
 
-            function applySoundState() {
-                const soundIconOn = document.getElementById('sound-icon-on');
-                const soundIconOff = document.getElementById('sound-icon-off');
-                
+    document.getElementById('shuffle-toggle').addEventListener('click', function(e) {
+        e.stopPropagation();
+        shuffleEnabled = !shuffleEnabled;
+        localStorage.setItem('echodream_shuffle_enabled', shuffleEnabled);
+        applyShuffleState();
+        console.log('Shuffle ' + (shuffleEnabled ? 'enabled' : 'disabled'));
+        
+        if (shuffleEnabled && youtubePlayer && isPlayerReady) {
+            playRandomVideo();
+        }
+    });
+
+    window.addEventListener('beforeunload', () => {
+        if (bgmEnabled) {
+            savePlaybackPosition();
+        }
+        if (youtubePlayer) {
+            try {
+                youtubePlayer.pauseVideo();
+                youtubePlayer.mute();
+            } catch(e) {}
+        }
+    });
+
+    document.addEventListener('visibilitychange', () => {
+        if (youtubePlayer && isPlayerReady) {
+            if (document.hidden) {
+                savePlaybackPosition();
+                youtubePlayer.pauseVideo();
+            } else {
                 if (bgmEnabled) {
-                    if (soundIconOn) soundIconOn.style.display = 'block';
-                    if (soundIconOff) soundIconOff.style.display = 'none';
-                } else {
-                    if (soundIconOn) soundIconOn.style.display = 'none';
-                    if (soundIconOff) soundIconOff.style.display = 'block';
-                }
-            }
-
-            function applyShuffleState() {
-                const shuffleBtn = document.getElementById('shuffle-toggle');
-                if (shuffleBtn) {
-                    if (shuffleEnabled) {
-                        shuffleBtn.classList.add('active');
-                    } else {
-                        shuffleBtn.classList.remove('active');
-                    }
-                }
-            }
-
-            const volumeSlider = document.getElementById('volume-slider');
-            const volumeDisplay = document.getElementById('volume-display');
-            const volumeContainer = document.getElementById('volume-slider-container');
-            const soundWrapper = document.getElementById('sound-wrapper');
-            const shuffleBtn = document.getElementById('shuffle-toggle');
-
-            let hoverTimeout;
-
-            soundWrapper.addEventListener('mouseenter', function() {
-                clearTimeout(hoverTimeout);
-                volumeContainer.classList.add('visible');
-                shuffleBtn.classList.add('visible');
-            });
-            soundWrapper.addEventListener('mouseleave', function() {
-                hoverTimeout = setTimeout(() => {
-                    volumeContainer.classList.remove('visible');
-                    shuffleBtn.classList.remove('visible');
-                }, 800);
-            });
-
-            volumeSlider.addEventListener('mouseenter', function() {
-                clearTimeout(hoverTimeout);
-                volumeContainer.classList.add('visible');
-                shuffleBtn.classList.add('visible');
-            });
-            volumeSlider.addEventListener('mouseleave', function() {
-                hoverTimeout = setTimeout(() => {
-                    volumeContainer.classList.remove('visible');
-                    shuffleBtn.classList.remove('visible');
-                }, 800);
-            });
-
-            shuffleBtn.addEventListener('mouseenter', function() {
-                clearTimeout(hoverTimeout);
-                shuffleBtn.classList.add('visible');
-            });
-            shuffleBtn.addEventListener('mouseleave', function() {
-                hoverTimeout = setTimeout(() => {
-                    shuffleBtn.classList.remove('visible');
-                }, 800);
-            });
-
-            volumeSlider.addEventListener('input', function() {
-                const val = parseInt(this.value);
-                userVolume = val;
-                volumeDisplay.textContent = val + '%';
-                localStorage.setItem('echodream_volume', val);
-                if (youtubePlayer && isPlayerReady) {
-                    youtubePlayer.setVolume(Math.round(val / 100 * 100));
-                }
-            });
-
-            document.getElementById('sound-toggle').addEventListener('click', function(e) {
-                e.stopPropagation();
-                bgmEnabled = !bgmEnabled;
-                localStorage.setItem('echodream_sound_enabled', bgmEnabled);
-                applySoundState();
-                
-                if (youtubePlayer) {
-                    if (bgmEnabled && !document.hidden) {
+                    setTimeout(() => {
                         youtubePlayer.unMute();
                         youtubePlayer.setVolume(Math.round(userVolume / 100 * 100));
                         youtubePlayer.playVideo();
-                    } else {
-                        youtubePlayer.pauseVideo();
-                        youtubePlayer.mute();
-                        savePlaybackPosition();
-                    }
-                }
-            });
-
-            document.getElementById('shuffle-toggle').addEventListener('click', function(e) {
-                e.stopPropagation();
-                shuffleEnabled = !shuffleEnabled;
-                localStorage.setItem('echodream_shuffle_enabled', shuffleEnabled);
-                applyShuffleState();
-                console.log('Shuffle ' + (shuffleEnabled ? 'enabled' : 'disabled'));
-                
-                if (shuffleEnabled && youtubePlayer && isPlayerReady) {
-                    playRandomVideo();
-                }
-            });
-
-            window.addEventListener('beforeunload', () => {
-                if (bgmEnabled) {
-                    savePlaybackPosition();
-                }
-                if (youtubePlayer) {
-                    try {
-                        youtubePlayer.pauseVideo();
-                        youtubePlayer.mute();
-                    } catch(e) {}
-                }
-            });
-
-            document.addEventListener('visibilitychange', () => {
-                if (youtubePlayer && isPlayerReady) {
-                    if (document.hidden) {
-                        savePlaybackPosition();
-                        youtubePlayer.pauseVideo();
-                    } else {
-                        if (bgmEnabled) {
-                            setTimeout(() => {
-                                youtubePlayer.unMute();
-                                youtubePlayer.setVolume(Math.round(userVolume / 100 * 100));
-                                youtubePlayer.playVideo();
-                            }, 500);
-                        } else {
-                            youtubePlayer.pauseVideo();
-                            youtubePlayer.mute();
-                        }
-                    }
-                }
-            });
-
-            applySoundState();
-            applyShuffleState();
-
-            function initClickAudio() {
-                if (!clickAudioContext) {
-                    clickAudioContext = new (window.AudioContext || window.webkitAudioContext)();
-                }
-                if (clickAudioContext.state === 'suspended') {
-                    clickAudioContext.resume();
+                    }, 500);
+                } else {
+                    youtubePlayer.pauseVideo();
+                    youtubePlayer.mute();
                 }
             }
+        }
+    });
 
-            document.addEventListener('click', (e) => {
-                if (bgmEnabled && e.target.closest('a, button, .contact-method, .form-submit, .socialIcons a, .skill-card')) {
-                    initClickAudio();
-                    playCuteClick();
-                }
-            });
+    // Scroll to top button
+    const scrollTopBtn = document.getElementById('scroll-top');
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 300) {
+            scrollTopBtn.classList.add('visible');
+        } else {
+            scrollTopBtn.classList.remove('visible');
+        }
+    });
+    scrollTopBtn.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
 
-            function playCuteClick() {
-                if (!clickAudioContext) return;
-                
-                const now = clickAudioContext.currentTime;
-                const osc = clickAudioContext.createOscillator();
-                const gain = clickAudioContext.createGain();
-                
-                osc.connect(gain);
-                gain.connect(clickAudioContext.destination);
-                
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(880, now);
-                osc.frequency.exponentialRampToValueAtTime(1320, now + 0.04);
-                osc.frequency.exponentialRampToValueAtTime(440, now + 0.08);
-                
-                gain.gain.setValueAtTime(0.04, now);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
-                
-                osc.start(now);
-                osc.stop(now + 0.1);
-            }
+    // Cute click sound
+    function initClickAudio() {
+        if (!clickAudioContext) {
+            clickAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (clickAudioContext.state === 'suspended') {
+            clickAudioContext.resume();
+        }
+    }
 
-            document.getElementById('mobile-toggle').addEventListener('click', () => { 
-                document.getElementById('main-nav').classList.toggle('active'); 
-            });
+    document.addEventListener('click', (e) => {
+        if (bgmEnabled && e.target.closest('a, button, .contact-method, .form-submit, .socialIcons a, .skill-card')) {
+            initClickAudio();
+            playCuteClick();
+        }
+    });
 
+    function playCuteClick() {
+        if (!clickAudioContext) return;
+        
+        const now = clickAudioContext.currentTime;
+        const osc = clickAudioContext.createOscillator();
+        const gain = clickAudioContext.createGain();
+        
+        osc.connect(gain);
+        gain.connect(clickAudioContext.destination);
+        
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, now);
+        osc.frequency.exponentialRampToValueAtTime(1320, now + 0.04);
+        osc.frequency.exponentialRampToValueAtTime(440, now + 0.08);
+        
+        gain.gain.setValueAtTime(0.04, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+        
+        osc.start(now);
+        osc.stop(now + 0.1);
+    }
+
+    applySoundState();
+    applyShuffleState();
+});
+
+   
             // Scroll top
             const scrollTopBtn = document.getElementById('scroll-top');
             window.addEventListener('scroll', () => {
