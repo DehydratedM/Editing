@@ -11,6 +11,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; overflow-x: hidden; cursor: none; }
 
+        /* CUSTOM CURSOR + SPARKLE EFFECTS */
         .custom-cursor { position: fixed; pointer-events: none; z-index: 999999; width: 20px; height: 20px; transform: translate(-50%, -50%); filter: drop-shadow(0 0 10px rgba(255,255,255,0.8)); }
         .custom-cursor::before, .custom-cursor::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 50%; box-shadow: 0 0 10px 2px rgba(255,255,255,0.9), 0 0 20px 6px rgba(255,255,255,0.5); }
         .custom-cursor::before { width: 18px; height: 2px; }
@@ -92,8 +93,6 @@
         .video-card:hover { transform: translateY(-5px); border-color: var(--accent); box-shadow: 0 12px 30px rgba(240,128,128,0.15); }
         .video-thumb { aspect-ratio: 16/9; background: linear-gradient(145deg, #1e1e28, #14141c); display: flex; align-items: center; justify-content: center; font-size: 2rem; position: relative; color: rgba(255,255,255,0.3); overflow: hidden; }
         .video-thumb iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; pointer-events: none; }
-        .video-thumb .play-overlay { position: absolute; width: 50px; height: 50px; background: rgba(240,128,128,0.2); border: 1px solid rgba(240,128,128,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; transition: all 0.3s ease; z-index: 2; pointer-events: none; }
-        .video-card:hover .play-overlay { background: rgba(240,128,128,0.4); box-shadow: 0 0 20px rgba(240,128,128,0.3); }
         .video-info { padding: 18px; }
         .video-info h3 { font-size: 0.95rem; margin-bottom: 6px; }
         .video-info p { color: var(--text2); font-size: 0.75rem; margin-bottom: 10px; line-height: 1.4; }
@@ -101,6 +100,7 @@
         .video-tag { padding: 3px 10px; border-radius: 20px; font-size: 0.6rem; background: rgba(240,128,128,0.15); color: var(--accent); border: 1px solid rgba(240,128,128,0.25); text-transform: uppercase; letter-spacing: 0.5px; }
         .video-tag.premiere { background: rgba(201,160,232,0.2); color: #c9a0e8; border-color: rgba(201,160,232,0.3); }
 
+        /* SOUND SYSTEM + CONTROLS */
         .sound-controls { position: fixed; bottom: 30px; right: 30px; z-index: 10000; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
         .scroll-top { width: 48px; height: 48px; border-radius: 50%; background: rgba(240,128,128,0.12); border: 1px solid rgba(240,128,128,0.25); color: var(--text); font-size: 1.1rem; cursor: none; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); opacity: 0; transform: translateY(20px) scale(0.8); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 15px rgba(240,128,128,0.08); }
         .scroll-top.visible { opacity: 1; transform: translateY(0) scale(1); }
@@ -190,7 +190,6 @@
             </a>
             <nav class="nav-links" id="main-nav">
                 <ul>
-                    <!-- Portfolio nav link removed as requested, kept only contact -->
                     <li><a href="contact.html">Contact</a></li>
                 </ul>
             </nav>
@@ -250,8 +249,7 @@
 
     <script src="https://www.youtube.com/iframe_api"></script>
     <script>
-        // [All the same JavaScript from previous version - BGM, sparkles, cursor, etc. unchanged]
-        // Included exact references with embedded video IDs (visible previews)
+        // Video data with embedded YouTube references (no play overlay, no youtube icons on cards)
         const editingVideos = [
             { title: "Game Trailer Edit", desc: "Cinematic pacing with color grading and sound design.", tags: ["Premiere Pro", "Color Grade"], premiere: true, videoId: "M7lc1UVf-VE" },
             { title: "Devlog Highlights", desc: "Engaging cuts with motion graphics and transitions.", tags: ["Premiere Pro", "Motion Graphics"], premiere: true, videoId: "dQw4w9WgXcQ" },
@@ -267,7 +265,6 @@
                 <div class="video-card">
                     <div class="video-thumb">
                         <iframe src="https://www.youtube.com/embed/${v.videoId}?autoplay=0&mute=1&controls=0&loop=1&playlist=${v.videoId}&rel=0&showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-                        <div class="play-overlay">▶</div>
                     </div>
                     <div class="video-info">
                         <h3>${v.title}</h3>
@@ -281,8 +278,6 @@
         }
         renderVideos();
 
-        // --- All previous JS from "previous version" (BGM, sparkles, cursor, sound controls, etc.) -- 
-        // Recreated faithfully based on the original structure (without altering core behavior)
         document.addEventListener('DOMContentLoaded', function() {
             // Custom cursor
             const cursor = document.getElementById('custom-cursor');
@@ -294,7 +289,7 @@
                 ring.style.top = e.clientY + 'px';
             });
 
-            // Sparkle particles on click / move (simplified but active)
+            // Sparkle trail + random sparkles on move and click
             function createSparkle(e, type) {
                 const sparkle = document.createElement('div');
                 if (type === 'particle') sparkle.className = 'sparkle-particle';
@@ -306,14 +301,15 @@
                 setTimeout(() => sparkle.remove(), 700);
             }
             document.addEventListener('mousemove', (e) => {
-                if (Math.random() > 0.92) createSparkle(e, 'star');
+                if (Math.random() > 0.93) createSparkle(e, 'star');
+                if (Math.random() > 0.97) createSparkle(e, 'diamond');
             });
             document.addEventListener('click', (e) => {
                 createSparkle(e, 'particle');
                 createSparkle(e, 'star');
             });
 
-            // Sound toggle & volume
+            // Sound toggle, volume slider, and visibility
             const soundToggle = document.getElementById('sound-toggle');
             const soundIconOn = document.getElementById('sound-icon-on');
             const soundIconOff = document.getElementById('sound-icon-off');
@@ -344,7 +340,7 @@
                 volumeDisplay.textContent = volumeSlider.value + '%';
             });
 
-            // Scroll top
+            // Scroll top button
             const scrollTopBtn = document.getElementById('scroll-top');
             window.addEventListener('scroll', () => {
                 if (window.scrollY > 300) scrollTopBtn.classList.add('visible');
@@ -352,15 +348,12 @@
             });
             scrollTopBtn.addEventListener('click', () => window.scrollTo({top: 0, behavior: 'smooth'}));
 
-            // Mobile nav toggle
+            // Mobile navigation toggle
             const mobileToggle = document.getElementById('mobile-toggle');
             const mainNav = document.getElementById('main-nav');
             mobileToggle.addEventListener('click', () => {
                 mainNav.classList.toggle('active');
             });
-
-            // Shuffle button hidden (as originally)
-            // No extra BGM logic as per original (background video autoplays)
         });
     </script>
 </body>
