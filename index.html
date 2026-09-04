@@ -289,630 +289,619 @@
         <div class="Oo"><p>Contact: <a href="mailto:echodream.contact@gmail.com">echodream.contact@gmail.com</a></p><p>© 2025 EchoDream.Studio ✿</p></div>
     </footer>
 
-    <script src="https://www.youtube.com/iframe_api"></script>
-    <script>
-        // ============================================================
-        // GLOBAL VARIABLES FOR SOUND SYSTEM
-        // ============================================================
-        let youtubePlayer = null;
-        let bgmEnabled = true;
-        let shuffleEnabled = false;
-        let isPlayerReady = false;
-        let isSeekingComplete = false;
-        let pendingSeekTime = 0;
-        let playlistVideos = [];
-        let currentVideoIndex = 0;
-        let clickAudioContext = null;
-        let userVolume = 70;
+  <script src="https://www.youtube.com/iframe_api"></script>
+<script>
+    // ============================================================
+    // GLOBAL VARIABLES FOR SOUND SYSTEM
+    // ============================================================
+    let youtubePlayer = null;
+    let bgmEnabled = true;
+    let shuffleEnabled = false;
+    let isPlayerReady = false;
+    let pendingSeekTime = 0;
+    let playlistVideos = [];
+    let currentVideoIndex = 0;
+    let clickAudioContext = null;
+    let userVolume = 70;
 
-        const PLAYLIST_ID = 'PLUmFF7Wbo1Gw';
+    // Use individual video IDs instead of playlist ID
+    const BGM_VIDEOS = [
+        'jfKfPfyJRdk', // lofi hip hop radio
+        '5qap5aO4i9A', // lofi girl
+        'DWcJFNfaw9c', // lofi beats
+        '4xDzrJKXOOY', // synthwave radio
+        'n61ULEU7CO0', // lofi sleep
+    ];
 
-        const savedVolume = localStorage.getItem('echodream_volume');
-        if (savedVolume !== null) userVolume = parseInt(savedVolume);
+    const savedVolume = localStorage.getItem('echodream_volume');
+    if (savedVolume !== null) userVolume = parseInt(savedVolume);
 
-        const savedSoundState = localStorage.getItem('echodream_sound_enabled');
-        if (savedSoundState !== null) bgmEnabled = savedSoundState === 'true';
+    const savedSoundState = localStorage.getItem('echodream_sound_enabled');
+    if (savedSoundState !== null) bgmEnabled = savedSoundState === 'true';
 
-        const savedShuffleState = localStorage.getItem('echodream_shuffle_enabled');
-        if (savedShuffleState !== null) shuffleEnabled = savedShuffleState === 'true';
+    const savedShuffleState = localStorage.getItem('echodream_shuffle_enabled');
+    if (savedShuffleState !== null) shuffleEnabled = savedShuffleState === 'true';
 
-        const savedVideoTime = parseFloat(localStorage.getItem('echodream_bgm_time') || '0');
-        const savedVideoIndex = parseInt(localStorage.getItem('echodream_bgm_index') || '0');
-        currentVideoIndex = savedVideoIndex;
+    const savedVideoTime = parseFloat(localStorage.getItem('echodream_bgm_time') || '0');
+    const savedVideoIndex = parseInt(localStorage.getItem('echodream_bgm_index') || '0');
+    currentVideoIndex = savedVideoIndex;
 
-        // ============================================================
-        // YOUTUBE API - MUST BE IN GLOBAL SCOPE
-        // ============================================================
-        function onYouTubeIframeAPIReady() {
-            youtubePlayer = new YT.Player('youtube-bgm-player', {
-                height: '1',
-                width: '1',
-                playerVars: {
-                    autoplay: 0,
-                    controls: 0,
-                    disablekb: 1,
-                    fs: 0,
-                    iv_load_policy: 3,
-                    listType: 'playlist',
-                    list: PLAYLIST_ID,
-                    index: savedVideoIndex,
-                    loop: 1,
-                    modestbranding: 1,
-                    rel: 0,
-                    showinfo: 0,
-                    volume: Math.round(userVolume / 100 * 100)
-                },
-                events: {
-                    onReady: onPlayerReady,
-                    onStateChange: onPlayerStateChange
-                }
-            });
+    // ============================================================
+    // YOUTUBE API - MUST BE IN GLOBAL SCOPE
+    // ============================================================
+    function onYouTubeIframeAPIReady() {
+        youtubePlayer = new YT.Player('youtube-bgm-player', {
+            height: '1',
+            width: '1',
+            videoId: BGM_VIDEOS[currentVideoIndex],
+            playerVars: {
+                autoplay: 0,
+                controls: 0,
+                disablekb: 1,
+                fs: 0,
+                iv_load_policy: 3,
+                loop: 1,
+                modestbranding: 1,
+                rel: 0,
+                showinfo: 0,
+                volume: Math.round(userVolume / 100 * 100)
+            },
+            events: {
+                onReady: onPlayerReady,
+                onStateChange: onPlayerStateChange
+            }
+        });
+    }
+
+    function onPlayerReady(event) {
+        isPlayerReady = true;
+        applySoundState();
+        applyShuffleState();
+        
+        const vol = Math.round(userVolume / 100 * 100);
+        event.target.setVolume(vol);
+        
+        document.getElementById('volume-slider').value = userVolume;
+        document.getElementById('volume-display').textContent = userVolume + '%';
+        
+        if (savedVideoTime > 1) {
+            pendingSeekTime = savedVideoTime;
         }
-
-        function onPlayerReady(event) {
-            isPlayerReady = true;
-            applySoundState();
-            applyShuffleState();
-            
-            const vol = Math.round(userVolume / 100 * 100);
-            event.target.setVolume(vol);
-            
-            document.getElementById('volume-slider').value = userVolume;
-            document.getElementById('volume-display').textContent = userVolume + '%';
-            
-            try {
-                playlistVideos = event.target.getPlaylist();
-                console.log('Playlist loaded:', playlistVideos.length, 'videos');
-            } catch(e) {
-                console.log('Could not get playlist:', e);
-            }
-            
-            if (savedVideoTime > 1) {
-                pendingSeekTime = savedVideoTime;
-            }
-            
-            if (bgmEnabled && !document.hidden) {
-                setTimeout(() => {
-                    if (youtubePlayer && bgmEnabled) {
-                        youtubePlayer.unMute();
-                        youtubePlayer.playVideo();
-                        console.log('BGM started playing');
-                    }
-                }, 2000);
-            } else {
-                event.target.pauseVideo();
-                event.target.mute();
-            }
-            
-            document.getElementById('shuffle-toggle').style.display = 'flex';
-            
-            setInterval(() => {
-                if (bgmEnabled && !document.hidden && isPlayerReady) {
-                    savePlaybackPosition();
+        
+        if (bgmEnabled && !document.hidden) {
+            setTimeout(() => {
+                if (youtubePlayer && bgmEnabled) {
+                    youtubePlayer.unMute();
+                    youtubePlayer.playVideo();
+                    console.log('BGM started playing');
                 }
             }, 2000);
+        } else {
+            event.target.pauseVideo();
+            event.target.mute();
         }
-
-        function onPlayerStateChange(event) {
-            if (event.data === YT.PlayerState.PLAYING) {
-                isSeekingComplete = false;
-                console.log('BGM is now playing');
-                
-                if (pendingSeekTime > 0 && !isSeekingComplete) {
-                    setTimeout(() => {
-                        try {
-                            if (youtubePlayer && pendingSeekTime > 0) {
-                                youtubePlayer.seekTo(pendingSeekTime, true);
-                                pendingSeekTime = 0;
-                                isSeekingComplete = true;
-                            }
-                        } catch(e) {}
-                    }, 800);
-                }
-                
-                if (document.hidden || !bgmEnabled) {
-                    event.target.pauseVideo();
-                }
-            }
-            
-            if (event.data === YT.PlayerState.ENDED) {
-                localStorage.setItem('echodream_bgm_time', '0');
-                pendingSeekTime = 0;
-                
-                if (bgmEnabled && !document.hidden) {
-                    if (shuffleEnabled) {
-                        setTimeout(() => {
-                            playRandomVideo();
-                        }, 500);
-                    } else {
-                        setTimeout(() => {
-                            event.target.nextVideo();
-                        }, 500);
-                    }
-                } else {
-                    event.target.pauseVideo();
-                }
-            }
-            
-            if (event.data === YT.PlayerState.PAUSED) {
+        
+        document.getElementById('shuffle-toggle').style.display = 'flex';
+        
+        setInterval(() => {
+            if (bgmEnabled && !document.hidden && isPlayerReady) {
                 savePlaybackPosition();
             }
+        }, 2000);
+    }
+
+    function onPlayerStateChange(event) {
+        if (event.data === YT.PlayerState.PLAYING) {
+            console.log('BGM is now playing');
             
-            if (event.data === YT.PlayerState.CUED) {
-                savePlaybackPosition();
-                isSeekingComplete = false;
+            if (pendingSeekTime > 0) {
+                setTimeout(() => {
+                    try {
+                        if (youtubePlayer && pendingSeekTime > 0) {
+                            youtubePlayer.seekTo(pendingSeekTime, true);
+                            pendingSeekTime = 0;
+                        }
+                    } catch(e) {}
+                }, 800);
             }
-        }
-
-        function playRandomVideo() {
-            if (!youtubePlayer || !isPlayerReady) return;
             
-            try {
-                if (playlistVideos && playlistVideos.length > 1) {
-                    let randomIndex;
-                    do {
-                        randomIndex = Math.floor(Math.random() * playlistVideos.length);
-                    } while (randomIndex === currentVideoIndex && playlistVideos.length > 1);
-                    
-                    currentVideoIndex = randomIndex;
-                    localStorage.setItem('echodream_bgm_index', randomIndex.toString());
-                    localStorage.setItem('echodream_bgm_time', '0');
-                    
-                    youtubePlayer.playVideoAt(randomIndex);
-                    console.log('Playing random video at index:', randomIndex);
-                } else {
-                    youtubePlayer.nextVideo();
-                }
-            } catch(e) {
-                console.log('Shuffle error:', e);
-                youtubePlayer.nextVideo();
+            if (document.hidden || !bgmEnabled) {
+                event.target.pauseVideo();
             }
         }
-
-        function savePlaybackPosition() {
-            if (youtubePlayer && isPlayerReady) {
-                try {
-                    const currentTime = youtubePlayer.getCurrentTime();
-                    const currentIndex = youtubePlayer.getPlaylistIndex();
-                    
-                    if (currentTime > 0.5) {
-                        localStorage.setItem('echodream_bgm_time', currentTime.toString());
-                    }
-                    if (currentIndex >= 0) {
-                        localStorage.setItem('echodream_bgm_index', currentIndex.toString());
-                        currentVideoIndex = currentIndex;
-                    }
-                } catch(e) {}
-            }
-        }
-
-        function applySoundState() {
-            const soundIconOn = document.getElementById('sound-icon-on');
-            const soundIconOff = document.getElementById('sound-icon-off');
+        
+        if (event.data === YT.PlayerState.ENDED) {
+            localStorage.setItem('echodream_bgm_time', '0');
+            pendingSeekTime = 0;
             
-            if (bgmEnabled) {
-                if (soundIconOn) soundIconOn.style.display = 'block';
-                if (soundIconOff) soundIconOff.style.display = 'none';
-            } else {
-                if (soundIconOn) soundIconOn.style.display = 'none';
-                if (soundIconOff) soundIconOff.style.display = 'block';
-            }
-        }
-
-        function applyShuffleState() {
-            const shuffleBtn = document.getElementById('shuffle-toggle');
-            if (shuffleBtn) {
+            if (bgmEnabled && !document.hidden) {
                 if (shuffleEnabled) {
-                    shuffleBtn.classList.add('active');
+                    setTimeout(() => {
+                        playRandomVideo();
+                    }, 500);
                 } else {
-                    shuffleBtn.classList.remove('active');
+                    setTimeout(() => {
+                        playNextVideo();
+                    }, 500);
                 }
+            } else {
+                event.target.pauseVideo();
             }
         }
+        
+        if (event.data === YT.PlayerState.PAUSED) {
+            savePlaybackPosition();
+        }
+    }
 
-        // ============================================================
-        // VIDEO RENDER
-        // ============================================================
-        const editingVideos = [
-            { title: "Game Trailer Edit", desc: "Cinematic pacing with color grading and sound design.", tags: ["Premiere Pro", "Color Grade"], premiere: true, videoId: "M7lc1UVf-VE" },
-            { title: "Devlog Highlights", desc: "Engaging cuts with motion graphics and transitions.", tags: ["Premiere Pro", "Motion Graphics"], premiere: true, videoId: "dQw4w9WgXcQ" },
-            { title: "Gameplay Montage", desc: "High-energy edit with speed ramps and beat sync.", tags: ["Premiere Pro", "Speed Ramps"], premiere: true, videoId: "kJQP7kiw5Fk" },
-            { title: "Social Media Pack", desc: "Platform-optimized vertical content.", tags: ["Premiere Pro", "Social Media"], premiere: true, videoId: "9bZkp7q19f0" },
-            { title: "Kickstarter Video", desc: "Persuasive edit with call-to-action.", tags: ["Premiere Pro", "Marketing"], premiere: true, videoId: "hTWKbfoikeg" },
-            { title: "Music Video Collab", desc: "Rhythm-based editing for indie artist.", tags: ["Premiere Pro", "Music Video"], premiere: false, videoId: "60ItHLz5WEA" }
-        ];
+    function playNextVideo() {
+        currentVideoIndex = (currentVideoIndex + 1) % BGM_VIDEOS.length;
+        localStorage.setItem('echodream_bgm_index', currentVideoIndex.toString());
+        localStorage.setItem('echodream_bgm_time', '0');
+        
+        if (youtubePlayer && isPlayerReady) {
+            youtubePlayer.loadVideoById(BGM_VIDEOS[currentVideoIndex]);
+            youtubePlayer.playVideo();
+            console.log('Playing next video:', BGM_VIDEOS[currentVideoIndex]);
+        }
+    }
 
-        function renderVideos() {
-            const grid = document.getElementById('videoGrid');
-            grid.innerHTML = editingVideos.map(v => `
-                <div class="video-card">
-                    <div class="video-thumb">
-                        <iframe src="https://www.youtube.com/embed/${v.videoId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${v.videoId}&rel=0&showinfo=0&modestbranding=1&iv_load_policy=3&disablekb=1&fs=0&playsinline=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-                    </div>
-                    <div class="video-info">
-                        <h3>${v.title}</h3>
-                        <p>${v.desc}</p>
-                        <div class="video-tags">
-                            ${v.tags.map(t => `<span class="video-tag ${t === 'Premiere Pro' ? 'premiere' : ''}">${t}</span>`).join('')}
-                        </div>
+    function playRandomVideo() {
+        if (!youtubePlayer || !isPlayerReady) return;
+        
+        let randomIndex;
+        do {
+            randomIndex = Math.floor(Math.random() * BGM_VIDEOS.length);
+        } while (randomIndex === currentVideoIndex && BGM_VIDEOS.length > 1);
+        
+        currentVideoIndex = randomIndex;
+        localStorage.setItem('echodream_bgm_index', randomIndex.toString());
+        localStorage.setItem('echodream_bgm_time', '0');
+        
+        youtubePlayer.loadVideoById(BGM_VIDEOS[randomIndex]);
+        youtubePlayer.playVideo();
+        console.log('Playing random video:', BGM_VIDEOS[randomIndex]);
+    }
+
+    function savePlaybackPosition() {
+        if (youtubePlayer && isPlayerReady) {
+            try {
+                const currentTime = youtubePlayer.getCurrentTime();
+                
+                if (currentTime > 0.5) {
+                    localStorage.setItem('echodream_bgm_time', currentTime.toString());
+                }
+            } catch(e) {}
+        }
+    }
+
+    function applySoundState() {
+        const soundIconOn = document.getElementById('sound-icon-on');
+        const soundIconOff = document.getElementById('sound-icon-off');
+        
+        if (bgmEnabled) {
+            if (soundIconOn) soundIconOn.style.display = 'block';
+            if (soundIconOff) soundIconOff.style.display = 'none';
+        } else {
+            if (soundIconOn) soundIconOn.style.display = 'none';
+            if (soundIconOff) soundIconOff.style.display = 'block';
+        }
+    }
+
+    function applyShuffleState() {
+        const shuffleBtn = document.getElementById('shuffle-toggle');
+        if (shuffleBtn) {
+            if (shuffleEnabled) {
+                shuffleBtn.classList.add('active');
+            } else {
+                shuffleBtn.classList.remove('active');
+            }
+        }
+    }
+
+    // ============================================================
+    // VIDEO RENDER
+    // ============================================================
+    const editingVideos = [
+        { title: "Game Trailer Edit", desc: "Cinematic pacing with color grading and sound design.", tags: ["Premiere Pro", "Color Grade"], premiere: true, videoId: "M7lc1UVf-VE" },
+        { title: "Devlog Highlights", desc: "Engaging cuts with motion graphics and transitions.", tags: ["Premiere Pro", "Motion Graphics"], premiere: true, videoId: "dQw4w9WgXcQ" },
+        { title: "Gameplay Montage", desc: "High-energy edit with speed ramps and beat sync.", tags: ["Premiere Pro", "Speed Ramps"], premiere: true, videoId: "kJQP7kiw5Fk" },
+        { title: "Social Media Pack", desc: "Platform-optimized vertical content.", tags: ["Premiere Pro", "Social Media"], premiere: true, videoId: "9bZkp7q19f0" },
+        { title: "Kickstarter Video", desc: "Persuasive edit with call-to-action.", tags: ["Premiere Pro", "Marketing"], premiere: true, videoId: "hTWKbfoikeg" },
+        { title: "Music Video Collab", desc: "Rhythm-based editing for indie artist.", tags: ["Premiere Pro", "Music Video"], premiere: false, videoId: "60ItHLz5WEA" }
+    ];
+
+    function renderVideos() {
+        const grid = document.getElementById('videoGrid');
+        grid.innerHTML = editingVideos.map(v => `
+            <div class="video-card">
+                <div class="video-thumb">
+                    <iframe src="https://www.youtube.com/embed/${v.videoId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${v.videoId}&rel=0&showinfo=0&modestbranding=1&iv_load_policy=3&disablekb=1&fs=0&playsinline=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                </div>
+                <div class="video-info">
+                    <h3>${v.title}</h3>
+                    <p>${v.desc}</p>
+                    <div class="video-tags">
+                        ${v.tags.map(t => `<span class="video-tag ${t === 'Premiere Pro' ? 'premiere' : ''}">${t}</span>`).join('')}
                     </div>
                 </div>
-            `).join('');
-        }
-        renderVideos();
+            </div>
+        `).join('');
+    }
+    renderVideos();
 
-        // ============================================================
-        // DOM CONTENT LOADED - Initialize everything
-        // ============================================================
-        document.addEventListener('DOMContentLoaded', function() {
-            // Custom cursor
-            const customCursor = document.getElementById('custom-cursor');
-            const cursorRing = document.getElementById('cursor-ring');
-            
-            class SparkleTrail {
-                constructor() {
-                    this.particles = [];
-                    this.maxParticles = 35;
-                    this.trailInterval = 15;
-                    this.lastTrailTime = 0;
-                    this.mouseX = 0;
-                    this.mouseY = 0;
-                    this.isActive = false;
-                }
-
-                init() {
-                    document.addEventListener('mousemove', (e) => {
-                        this.mouseX = e.clientX;
-                        this.mouseY = e.clientY;
-                        this.isActive = true;
-                        customCursor.style.left = e.clientX + 'px';
-                        customCursor.style.top = e.clientY + 'px';
-                        cursorRing.style.left = e.clientX + 'px';
-                        cursorRing.style.top = e.clientY + 'px';
-                        
-                        const now = performance.now();
-                        if (now - this.lastTrailTime > this.trailInterval) {
-                            this.lastTrailTime = now;
-                            this.createTrailParticle(e.clientX, e.clientY);
-                            if (Math.random() > 0.6) {
-                                this.createTrailParticle(e.clientX + (Math.random()-0.5)*10, e.clientY + (Math.random()-0.5)*10);
-                            }
-                        }
-                    });
-
-                    document.addEventListener('mouseleave', () => {
-                        this.isActive = false;
-                    });
-
-                    document.addEventListener('click', (e) => {
-                        for (let i = 0; i < 15; i++) {
-                            this.createBurstParticle(e.clientX, e.clientY);
-                        }
-                    });
-                }
-
-                createTrailParticle(x, y) {
-                    const el = document.createElement('div');
-                    const size = 1.5 + Math.random() * 4;
-                    const colors = ['#ffffff', '#ffe8f0', '#ffd1dc', '#ffb6c1', '#f08080', '#ffd1dc', '#e8b4c8', '#c9a0e8', '#7ec8e3'];
-                    const colorIndex = Math.random() < 0.4 ? 0 : Math.floor(Math.random() * colors.length);
-                    const color = colors[colorIndex];
-                    
-                    el.style.cssText = `
-                        position: fixed;
-                        pointer-events: none;
-                        z-index: 99995;
-                        width: ${size}px;
-                        height: ${size}px;
-                        border-radius: 50%;
-                        background: ${color};
-                        left: ${x - size/2}px;
-                        top: ${y - size/2}px;
-                        opacity: 1;
-                        box-shadow: 0 0 ${size * 4}px ${color}50, 0 0 ${size * 8}px ${color}25;
-                        transition: none;
-                        will-change: transform, opacity;
-                    `;
-                    
-                    document.body.appendChild(el);
-                    
-                    const dx = (Math.random() - 0.5) * 3;
-                    const dy = (Math.random() - 0.5) * 3 - 1.5;
-                    const startTime = performance.now();
-                    const duration = 800 + Math.random() * 500;
-                    const startScale = 0.2 + Math.random() * 0.3;
-                    
-                    const animate = (time) => {
-                        const progress = (time - startTime) / duration;
-                        if (progress >= 1) {
-                            if (el.parentNode) el.remove();
-                            return;
-                        }
-                        
-                        const ease = 1 - Math.pow(1 - progress, 2);
-                        const currentX = x + dx * progress * 50;
-                        const currentY = y + dy * progress * 50 - progress * 35;
-                        const scale = startScale * (1 + progress * 0.9);
-                        const opacity = 1 - Math.pow(progress, 1.4);
-                        
-                        el.style.transform = `translate(${currentX - x}px, ${currentY - y}px) scale(${scale})`;
-                        el.style.opacity = Math.max(0, opacity);
-                        
-                        requestAnimationFrame(animate);
-                    };
-                    
-                    requestAnimationFrame(animate);
-                }
-
-                createBurstParticle(x, y) {
-                    const el = document.createElement('div');
-                    const size = 2 + Math.random() * 6;
-                    const colors = ['#ffffff', '#ffe8f0', '#ffd1dc', '#ffb6c1', '#f08080', '#ffd1dc', '#e8b4c8', '#c9a0e8', '#7ec8e3', '#ffc0cb'];
-                    const color = colors[Math.floor(Math.random() * colors.length)];
-                    const angle = Math.random() * Math.PI * 2;
-                    const speed = 2 + Math.random() * 6;
-                    
-                    el.style.cssText = `
-                        position: fixed;
-                        pointer-events: none;
-                        z-index: 99995;
-                        width: ${size}px;
-                        height: ${size}px;
-                        border-radius: 50%;
-                        background: ${color};
-                        left: ${x - size/2}px;
-                        top: ${y - size/2}px;
-                        opacity: 1;
-                        box-shadow: 0 0 ${size * 5}px ${color}60, 0 0 ${size * 10}px ${color}30;
-                        transition: none;
-                        will-change: transform, opacity;
-                    `;
-                    
-                    document.body.appendChild(el);
-                    
-                    const dx = Math.cos(angle) * speed;
-                    const dy = Math.sin(angle) * speed;
-                    const startTime = performance.now();
-                    const duration = 900 + Math.random() * 500;
-                    
-                    const animate = (time) => {
-                        const progress = (time - startTime) / duration;
-                        if (progress >= 1) {
-                            if (el.parentNode) el.remove();
-                            return;
-                        }
-                        
-                        const ease = 1 - Math.pow(1 - progress, 1.5);
-                        const currentX = x + dx * progress * 70;
-                        const currentY = y + dy * progress * 70 - progress * 20;
-                        const scale = 0.3 + progress * 0.8;
-                        const opacity = 1 - Math.pow(progress, 1.2);
-                        
-                        el.style.transform = `translate(${currentX - x}px, ${currentY - y}px) scale(${scale})`;
-                        el.style.opacity = Math.max(0, opacity);
-                        
-                        requestAnimationFrame(animate);
-                    };
-                    
-                    requestAnimationFrame(animate);
-                }
+    // ============================================================
+    // DOM CONTENT LOADED
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', function() {
+        // Custom cursor
+        const customCursor = document.getElementById('custom-cursor');
+        const cursorRing = document.getElementById('cursor-ring');
+        
+        class SparkleTrail {
+            constructor() {
+                this.particles = [];
+                this.maxParticles = 35;
+                this.trailInterval = 15;
+                this.lastTrailTime = 0;
+                this.mouseX = 0;
+                this.mouseY = 0;
+                this.isActive = false;
             }
 
-            const sparkleTrail = new SparkleTrail();
-            sparkleTrail.init();
-
-            // Sparkle system
-            const SparkleSystem = {
-                enabled: true, lastSparkleTime: 0, sparkleInterval: 60, lastMousePosition: null,
-                init() {
-                    document.addEventListener('mousemove', (e) => this.onMouseMove(e));
-                    document.addEventListener('touchmove', (e) => this.onTouchMove(e), { passive: true });
-                    setInterval(() => { if (this.enabled && this.lastMousePosition) { 
-                        this.createSparkle(this.lastMousePosition.x, this.lastMousePosition.y);
-                        if (Math.random() > 0.5) {
-                            this.createSparkle(this.lastMousePosition.x + (Math.random()-0.5)*80, this.lastMousePosition.y + (Math.random()-0.5)*80);
+            init() {
+                document.addEventListener('mousemove', (e) => {
+                    this.mouseX = e.clientX;
+                    this.mouseY = e.clientY;
+                    this.isActive = true;
+                    customCursor.style.left = e.clientX + 'px';
+                    customCursor.style.top = e.clientY + 'px';
+                    cursorRing.style.left = e.clientX + 'px';
+                    cursorRing.style.top = e.clientY + 'px';
+                    
+                    const now = performance.now();
+                    if (now - this.lastTrailTime > this.trailInterval) {
+                        this.lastTrailTime = now;
+                        this.createTrailParticle(e.clientX, e.clientY);
+                        if (Math.random() > 0.6) {
+                            this.createTrailParticle(e.clientX + (Math.random()-0.5)*10, e.clientY + (Math.random()-0.5)*10);
                         }
-                    } }, 200);
-                    setInterval(() => {
-                        if (Math.random() > 0.3) {
-                            const x = Math.random() * window.innerWidth;
-                            const y = Math.random() * window.innerHeight;
-                            this.createSparkle(x, y);
-                        }
-                    }, 800);
-                },
-                onMouseMove(e) { this.lastMousePosition = { x: e.clientX, y: e.clientY }; const now = performance.now(); if (now - this.lastSparkleTime < this.sparkleInterval) return; this.lastSparkleTime = now; const burstCount = 1 + Math.floor(Math.random() * 2); for (let i = 0; i < burstCount; i++) this.createSparkle(e.clientX, e.clientY); },
-                onTouchMove(e) { if (e.touches && e.touches.length > 0) { this.lastMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY }; } },
-                createSparkle(x, y) { 
-                    const existing = document.querySelectorAll('.sparkle-particle, .sparkle-star, .sparkle-diamond');
-                    if (existing.length > 50) return;
-                    const type = Math.random(); 
-                    if (type < 0.35) this.createParticle(x, y); 
-                    else if (type < 0.65) this.createStar(x, y); 
-                    else this.createDiamond(x, y); 
-                },
-                createParticle(x, y) { const p = document.createElement('div'); p.className = 'sparkle-particle'; const size = 2 + Math.random() * 3; const angle = Math.random() * Math.PI * 2; const dist = Math.random() * 30; p.style.left = (x + Math.cos(angle) * dist) + 'px'; p.style.top = (y + Math.sin(angle) * dist) + 'px'; p.style.width = size + 'px'; p.style.height = size + 'px'; document.body.appendChild(p); setTimeout(() => { if (p.parentNode) p.remove(); }, 500); },
-                createStar(x, y) { const s = document.createElement('div'); s.className = 'sparkle-star'; const size = 3 + Math.random() * 3; const angle = Math.random() * Math.PI * 2; const dist = Math.random() * 30; s.style.left = (x + Math.cos(angle) * dist) + 'px'; s.style.top = (y + Math.sin(angle) * dist) + 'px'; s.style.width = size + 'px'; s.style.height = size + 'px'; document.body.appendChild(s); setTimeout(() => { if (s.parentNode) s.remove(); }, 600); },
-                createDiamond(x, y) { const d = document.createElement('div'); d.className = 'sparkle-diamond'; const size = 3 + Math.random() * 2; const angle = Math.random() * Math.PI * 2; const dist = Math.random() * 25; d.style.left = (x + Math.cos(angle) * dist) + 'px'; d.style.top = (y + Math.sin(angle) * dist) + 'px'; d.style.width = size + 'px'; d.style.height = size + 'px'; document.body.appendChild(d); setTimeout(() => { if (d.parentNode) d.remove(); }, 400); }
-            };
-            SparkleSystem.init();
-
-            // Initialize sound controls
-            const volumeSlider = document.getElementById('volume-slider');
-            const volumeDisplay = document.getElementById('volume-display');
-            const volumeContainer = document.getElementById('volume-slider-container');
-            const soundWrapper = document.getElementById('sound-wrapper');
-            const shuffleBtn = document.getElementById('shuffle-toggle');
-
-            let hoverTimeout;
-
-            soundWrapper.addEventListener('mouseenter', function() {
-                clearTimeout(hoverTimeout);
-                volumeContainer.classList.add('visible');
-                shuffleBtn.classList.add('visible');
-            });
-            soundWrapper.addEventListener('mouseleave', function() {
-                hoverTimeout = setTimeout(() => {
-                    volumeContainer.classList.remove('visible');
-                    shuffleBtn.classList.remove('visible');
-                }, 800);
-            });
-
-            volumeSlider.addEventListener('mouseenter', function() {
-                clearTimeout(hoverTimeout);
-                volumeContainer.classList.add('visible');
-                shuffleBtn.classList.add('visible');
-            });
-            volumeSlider.addEventListener('mouseleave', function() {
-                hoverTimeout = setTimeout(() => {
-                    volumeContainer.classList.remove('visible');
-                    shuffleBtn.classList.remove('visible');
-                }, 800);
-            });
-
-            shuffleBtn.addEventListener('mouseenter', function() {
-                clearTimeout(hoverTimeout);
-                shuffleBtn.classList.add('visible');
-            });
-            shuffleBtn.addEventListener('mouseleave', function() {
-                hoverTimeout = setTimeout(() => {
-                    shuffleBtn.classList.remove('visible');
-                }, 800);
-            });
-
-            volumeSlider.addEventListener('input', function() {
-                const val = parseInt(this.value);
-                userVolume = val;
-                volumeDisplay.textContent = val + '%';
-                localStorage.setItem('echodream_volume', val);
-                if (youtubePlayer && isPlayerReady) {
-                    youtubePlayer.setVolume(Math.round(val / 100 * 100));
-                }
-            });
-
-            document.getElementById('sound-toggle').addEventListener('click', function(e) {
-                e.stopPropagation();
-                bgmEnabled = !bgmEnabled;
-                localStorage.setItem('echodream_sound_enabled', bgmEnabled);
-                applySoundState();
-                
-                if (youtubePlayer) {
-                    if (bgmEnabled && !document.hidden) {
-                        youtubePlayer.unMute();
-                        youtubePlayer.setVolume(Math.round(userVolume / 100 * 100));
-                        youtubePlayer.playVideo();
-                    } else {
-                        youtubePlayer.pauseVideo();
-                        youtubePlayer.mute();
-                        savePlaybackPosition();
                     }
-                }
-            });
+                });
 
-            document.getElementById('shuffle-toggle').addEventListener('click', function(e) {
-                e.stopPropagation();
-                shuffleEnabled = !shuffleEnabled;
-                localStorage.setItem('echodream_shuffle_enabled', shuffleEnabled);
-                applyShuffleState();
-                console.log('Shuffle ' + (shuffleEnabled ? 'enabled' : 'disabled'));
+                document.addEventListener('mouseleave', () => {
+                    this.isActive = false;
+                });
+
+                document.addEventListener('click', (e) => {
+                    for (let i = 0; i < 15; i++) {
+                        this.createBurstParticle(e.clientX, e.clientY);
+                    }
+                });
+            }
+
+            createTrailParticle(x, y) {
+                const el = document.createElement('div');
+                const size = 1.5 + Math.random() * 4;
+                const colors = ['#ffffff', '#ffe8f0', '#ffd1dc', '#ffb6c1', '#f08080', '#ffd1dc', '#e8b4c8', '#c9a0e8', '#7ec8e3'];
+                const colorIndex = Math.random() < 0.4 ? 0 : Math.floor(Math.random() * colors.length);
+                const color = colors[colorIndex];
                 
-                if (shuffleEnabled && youtubePlayer && isPlayerReady) {
-                    playRandomVideo();
-                }
-            });
+                el.style.cssText = `
+                    position: fixed;
+                    pointer-events: none;
+                    z-index: 99995;
+                    width: ${size}px;
+                    height: ${size}px;
+                    border-radius: 50%;
+                    background: ${color};
+                    left: ${x - size/2}px;
+                    top: ${y - size/2}px;
+                    opacity: 1;
+                    box-shadow: 0 0 ${size * 4}px ${color}50, 0 0 ${size * 8}px ${color}25;
+                    transition: none;
+                    will-change: transform, opacity;
+                `;
+                
+                document.body.appendChild(el);
+                
+                const dx = (Math.random() - 0.5) * 3;
+                const dy = (Math.random() - 0.5) * 3 - 1.5;
+                const startTime = performance.now();
+                const duration = 800 + Math.random() * 500;
+                const startScale = 0.2 + Math.random() * 0.3;
+                
+                const animate = (time) => {
+                    const progress = (time - startTime) / duration;
+                    if (progress >= 1) {
+                        if (el.parentNode) el.remove();
+                        return;
+                    }
+                    
+                    const ease = 1 - Math.pow(1 - progress, 2);
+                    const currentX = x + dx * progress * 50;
+                    const currentY = y + dy * progress * 50 - progress * 35;
+                    const scale = startScale * (1 + progress * 0.9);
+                    const opacity = 1 - Math.pow(progress, 1.4);
+                    
+                    el.style.transform = `translate(${currentX - x}px, ${currentY - y}px) scale(${scale})`;
+                    el.style.opacity = Math.max(0, opacity);
+                    
+                    requestAnimationFrame(animate);
+                };
+                
+                requestAnimationFrame(animate);
+            }
 
-            window.addEventListener('beforeunload', () => {
-                if (bgmEnabled) {
+            createBurstParticle(x, y) {
+                const el = document.createElement('div');
+                const size = 2 + Math.random() * 6;
+                const colors = ['#ffffff', '#ffe8f0', '#ffd1dc', '#ffb6c1', '#f08080', '#ffd1dc', '#e8b4c8', '#c9a0e8', '#7ec8e3', '#ffc0cb'];
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                const angle = Math.random() * Math.PI * 2;
+                const speed = 2 + Math.random() * 6;
+                
+                el.style.cssText = `
+                    position: fixed;
+                    pointer-events: none;
+                    z-index: 99995;
+                    width: ${size}px;
+                    height: ${size}px;
+                    border-radius: 50%;
+                    background: ${color};
+                    left: ${x - size/2}px;
+                    top: ${y - size/2}px;
+                    opacity: 1;
+                    box-shadow: 0 0 ${size * 5}px ${color}60, 0 0 ${size * 10}px ${color}30;
+                    transition: none;
+                    will-change: transform, opacity;
+                `;
+                
+                document.body.appendChild(el);
+                
+                const dx = Math.cos(angle) * speed;
+                const dy = Math.sin(angle) * speed;
+                const startTime = performance.now();
+                const duration = 900 + Math.random() * 500;
+                
+                const animate = (time) => {
+                    const progress = (time - startTime) / duration;
+                    if (progress >= 1) {
+                        if (el.parentNode) el.remove();
+                        return;
+                    }
+                    
+                    const ease = 1 - Math.pow(1 - progress, 1.5);
+                    const currentX = x + dx * progress * 70;
+                    const currentY = y + dy * progress * 70 - progress * 20;
+                    const scale = 0.3 + progress * 0.8;
+                    const opacity = 1 - Math.pow(progress, 1.2);
+                    
+                    el.style.transform = `translate(${currentX - x}px, ${currentY - y}px) scale(${scale})`;
+                    el.style.opacity = Math.max(0, opacity);
+                    
+                    requestAnimationFrame(animate);
+                };
+                
+                requestAnimationFrame(animate);
+            }
+        }
+
+        const sparkleTrail = new SparkleTrail();
+        sparkleTrail.init();
+
+        // Sparkle system
+        const SparkleSystem = {
+            enabled: true, lastSparkleTime: 0, sparkleInterval: 60, lastMousePosition: null,
+            init() {
+                document.addEventListener('mousemove', (e) => this.onMouseMove(e));
+                document.addEventListener('touchmove', (e) => this.onTouchMove(e), { passive: true });
+                setInterval(() => { if (this.enabled && this.lastMousePosition) { 
+                    this.createSparkle(this.lastMousePosition.x, this.lastMousePosition.y);
+                    if (Math.random() > 0.5) {
+                        this.createSparkle(this.lastMousePosition.x + (Math.random()-0.5)*80, this.lastMousePosition.y + (Math.random()-0.5)*80);
+                    }
+                } }, 200);
+                setInterval(() => {
+                    if (Math.random() > 0.3) {
+                        const x = Math.random() * window.innerWidth;
+                        const y = Math.random() * window.innerHeight;
+                        this.createSparkle(x, y);
+                    }
+                }, 800);
+            },
+            onMouseMove(e) { this.lastMousePosition = { x: e.clientX, y: e.clientY }; const now = performance.now(); if (now - this.lastSparkleTime < this.sparkleInterval) return; this.lastSparkleTime = now; const burstCount = 1 + Math.floor(Math.random() * 2); for (let i = 0; i < burstCount; i++) this.createSparkle(e.clientX, e.clientY); },
+            onTouchMove(e) { if (e.touches && e.touches.length > 0) { this.lastMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY }; } },
+            createSparkle(x, y) { 
+                const existing = document.querySelectorAll('.sparkle-particle, .sparkle-star, .sparkle-diamond');
+                if (existing.length > 50) return;
+                const type = Math.random(); 
+                if (type < 0.35) this.createParticle(x, y); 
+                else if (type < 0.65) this.createStar(x, y); 
+                else this.createDiamond(x, y); 
+            },
+            createParticle(x, y) { const p = document.createElement('div'); p.className = 'sparkle-particle'; const size = 2 + Math.random() * 3; const angle = Math.random() * Math.PI * 2; const dist = Math.random() * 30; p.style.left = (x + Math.cos(angle) * dist) + 'px'; p.style.top = (y + Math.sin(angle) * dist) + 'px'; p.style.width = size + 'px'; p.style.height = size + 'px'; document.body.appendChild(p); setTimeout(() => { if (p.parentNode) p.remove(); }, 500); },
+            createStar(x, y) { const s = document.createElement('div'); s.className = 'sparkle-star'; const size = 3 + Math.random() * 3; const angle = Math.random() * Math.PI * 2; const dist = Math.random() * 30; s.style.left = (x + Math.cos(angle) * dist) + 'px'; s.style.top = (y + Math.sin(angle) * dist) + 'px'; s.style.width = size + 'px'; s.style.height = size + 'px'; document.body.appendChild(s); setTimeout(() => { if (s.parentNode) s.remove(); }, 600); },
+            createDiamond(x, y) { const d = document.createElement('div'); d.className = 'sparkle-diamond'; const size = 3 + Math.random() * 2; const angle = Math.random() * Math.PI * 2; const dist = Math.random() * 25; d.style.left = (x + Math.cos(angle) * dist) + 'px'; d.style.top = (y + Math.sin(angle) * dist) + 'px'; d.style.width = size + 'px'; d.style.height = size + 'px'; document.body.appendChild(d); setTimeout(() => { if (d.parentNode) d.remove(); }, 400); }
+        };
+        SparkleSystem.init();
+
+        // Initialize sound controls
+        const volumeSlider = document.getElementById('volume-slider');
+        const volumeDisplay = document.getElementById('volume-display');
+        const volumeContainer = document.getElementById('volume-slider-container');
+        const soundWrapper = document.getElementById('sound-wrapper');
+        const shuffleBtn = document.getElementById('shuffle-toggle');
+
+        let hoverTimeout;
+
+        soundWrapper.addEventListener('mouseenter', function() {
+            clearTimeout(hoverTimeout);
+            volumeContainer.classList.add('visible');
+            shuffleBtn.classList.add('visible');
+        });
+        soundWrapper.addEventListener('mouseleave', function() {
+            hoverTimeout = setTimeout(() => {
+                volumeContainer.classList.remove('visible');
+                shuffleBtn.classList.remove('visible');
+            }, 800);
+        });
+
+        volumeSlider.addEventListener('mouseenter', function() {
+            clearTimeout(hoverTimeout);
+            volumeContainer.classList.add('visible');
+            shuffleBtn.classList.add('visible');
+        });
+        volumeSlider.addEventListener('mouseleave', function() {
+            hoverTimeout = setTimeout(() => {
+                volumeContainer.classList.remove('visible');
+                shuffleBtn.classList.remove('visible');
+            }, 800);
+        });
+
+        shuffleBtn.addEventListener('mouseenter', function() {
+            clearTimeout(hoverTimeout);
+            shuffleBtn.classList.add('visible');
+        });
+        shuffleBtn.addEventListener('mouseleave', function() {
+            hoverTimeout = setTimeout(() => {
+                shuffleBtn.classList.remove('visible');
+            }, 800);
+        });
+
+        volumeSlider.addEventListener('input', function() {
+            const val = parseInt(this.value);
+            userVolume = val;
+            volumeDisplay.textContent = val + '%';
+            localStorage.setItem('echodream_volume', val);
+            if (youtubePlayer && isPlayerReady) {
+                youtubePlayer.setVolume(Math.round(val / 100 * 100));
+            }
+        });
+
+        document.getElementById('sound-toggle').addEventListener('click', function(e) {
+            e.stopPropagation();
+            bgmEnabled = !bgmEnabled;
+            localStorage.setItem('echodream_sound_enabled', bgmEnabled);
+            applySoundState();
+            
+            if (youtubePlayer) {
+                if (bgmEnabled && !document.hidden) {
+                    youtubePlayer.unMute();
+                    youtubePlayer.setVolume(Math.round(userVolume / 100 * 100));
+                    youtubePlayer.playVideo();
+                } else {
+                    youtubePlayer.pauseVideo();
+                    youtubePlayer.mute();
                     savePlaybackPosition();
                 }
-                if (youtubePlayer) {
-                    try {
+            }
+        });
+
+        document.getElementById('shuffle-toggle').addEventListener('click', function(e) {
+            e.stopPropagation();
+            shuffleEnabled = !shuffleEnabled;
+            localStorage.setItem('echodream_shuffle_enabled', shuffleEnabled);
+            applyShuffleState();
+            console.log('Shuffle ' + (shuffleEnabled ? 'enabled' : 'disabled'));
+            
+            if (shuffleEnabled && youtubePlayer && isPlayerReady) {
+                playRandomVideo();
+            }
+        });
+
+        window.addEventListener('beforeunload', () => {
+            if (bgmEnabled) {
+                savePlaybackPosition();
+            }
+            if (youtubePlayer) {
+                try {
+                    youtubePlayer.pauseVideo();
+                    youtubePlayer.mute();
+                } catch(e) {}
+            }
+        });
+
+        document.addEventListener('visibilitychange', () => {
+            if (youtubePlayer && isPlayerReady) {
+                if (document.hidden) {
+                    savePlaybackPosition();
+                    youtubePlayer.pauseVideo();
+                } else {
+                    if (bgmEnabled) {
+                        setTimeout(() => {
+                            youtubePlayer.unMute();
+                            youtubePlayer.setVolume(Math.round(userVolume / 100 * 100));
+                            youtubePlayer.playVideo();
+                        }, 500);
+                    } else {
                         youtubePlayer.pauseVideo();
                         youtubePlayer.mute();
-                    } catch(e) {}
-                }
-            });
-
-            document.addEventListener('visibilitychange', () => {
-                if (youtubePlayer && isPlayerReady) {
-                    if (document.hidden) {
-                        savePlaybackPosition();
-                        youtubePlayer.pauseVideo();
-                    } else {
-                        if (bgmEnabled) {
-                            setTimeout(() => {
-                                youtubePlayer.unMute();
-                                youtubePlayer.setVolume(Math.round(userVolume / 100 * 100));
-                                youtubePlayer.playVideo();
-                            }, 500);
-                        } else {
-                            youtubePlayer.pauseVideo();
-                            youtubePlayer.mute();
-                        }
                     }
                 }
-            });
-
-            // Cute click sound
-            function initClickAudio() {
-                if (!clickAudioContext) {
-                    clickAudioContext = new (window.AudioContext || window.webkitAudioContext)();
-                }
-                if (clickAudioContext.state === 'suspended') {
-                    clickAudioContext.resume();
-                }
             }
-
-            document.addEventListener('click', (e) => {
-                if (bgmEnabled && e.target.closest('a, button, .contact-method, .form-submit, .socialIcons a, .skill-card')) {
-                    initClickAudio();
-                    playCuteClick();
-                }
-            });
-
-            function playCuteClick() {
-                if (!clickAudioContext) return;
-                
-                const now = clickAudioContext.currentTime;
-                const osc = clickAudioContext.createOscillator();
-                const gain = clickAudioContext.createGain();
-                
-                osc.connect(gain);
-                gain.connect(clickAudioContext.destination);
-                
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(880, now);
-                osc.frequency.exponentialRampToValueAtTime(1320, now + 0.04);
-                osc.frequency.exponentialRampToValueAtTime(440, now + 0.08);
-                
-                gain.gain.setValueAtTime(0.04, now);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
-                
-                osc.start(now);
-                osc.stop(now + 0.1);
-            }
-
-            applySoundState();
-            applyShuffleState();
-
-            // Mobile nav toggle
-            document.getElementById('mobile-toggle').addEventListener('click', () => { 
-                document.getElementById('main-nav').classList.toggle('active'); 
-            });
-
-            // Scroll top button
-            const scrollTopBtn = document.getElementById('scroll-top');
-            window.addEventListener('scroll', () => {
-                if (window.scrollY > 300) {
-                    scrollTopBtn.classList.add('visible');
-                } else {
-                    scrollTopBtn.classList.remove('visible');
-                }
-            });
-            scrollTopBtn.addEventListener('click', () => {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            });
         });
-    </script>
+
+        // Cute click sound
+        function initClickAudio() {
+            if (!clickAudioContext) {
+                clickAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (clickAudioContext.state === 'suspended') {
+                clickAudioContext.resume();
+            }
+        }
+
+        document.addEventListener('click', (e) => {
+            if (bgmEnabled && e.target.closest('a, button, .contact-method, .form-submit, .socialIcons a, .skill-card')) {
+                initClickAudio();
+                playCuteClick();
+            }
+        });
+
+        function playCuteClick() {
+            if (!clickAudioContext) return;
+            
+            const now = clickAudioContext.currentTime;
+            const osc = clickAudioContext.createOscillator();
+            const gain = clickAudioContext.createGain();
+            
+            osc.connect(gain);
+            gain.connect(clickAudioContext.destination);
+            
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(880, now);
+            osc.frequency.exponentialRampToValueAtTime(1320, now + 0.04);
+            osc.frequency.exponentialRampToValueAtTime(440, now + 0.08);
+            
+            gain.gain.setValueAtTime(0.04, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+            
+            osc.start(now);
+            osc.stop(now + 0.1);
+        }
+
+        applySoundState();
+        applyShuffleState();
+
+        // Mobile nav toggle
+        document.getElementById('mobile-toggle').addEventListener('click', () => { 
+            document.getElementById('main-nav').classList.toggle('active'); 
+        });
+
+        // Scroll top button
+        const scrollTopBtn = document.getElementById('scroll-top');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                scrollTopBtn.classList.add('visible');
+            } else {
+                scrollTopBtn.classList.remove('visible');
+            }
+        });
+        scrollTopBtn.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    });
+</script>
 </body>
 </html>
