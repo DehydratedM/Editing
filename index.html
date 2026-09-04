@@ -91,8 +91,7 @@
         .video-card:hover::before { opacity: 1; }
         .video-card:hover { transform: translateY(-5px); border-color: var(--accent); box-shadow: 0 12px 30px rgba(240,128,128,0.15); }
         .video-thumb { aspect-ratio: 16/9; background: linear-gradient(145deg, #1e1e28, #14141c); display: flex; align-items: center; justify-content: center; font-size: 2rem; position: relative; color: rgba(255,255,255,0.3); }
-        .video-thumb iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; pointer-events: none; }
-        .video-thumb .play-overlay { position: absolute; width: 50px; height: 50px; background: rgba(240,128,128,0.2); border: 1px solid rgba(240,128,128,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; transition: all 0.3s ease; z-index: 2; }
+        .video-thumb .play-overlay { position: absolute; width: 50px; height: 50px; background: rgba(240,128,128,0.2); border: 1px solid rgba(240,128,128,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; transition: all 0.3s ease; }
         .video-card:hover .play-overlay { background: rgba(240,128,128,0.4); box-shadow: 0 0 20px rgba(240,128,128,0.3); }
         .video-info { padding: 18px; }
         .video-info h3 { font-size: 0.95rem; margin-bottom: 6px; }
@@ -183,11 +182,10 @@
         <div class="HE">
             <a href="index.html" class="logo-container">
                 <div class="logo-img-wrapper">
-                    <img src="me.png" alt="Mea" onerror="this.style.display='none';this.parentElement.innerHTML='<span style=color:#f08080;font-size:1.5rem;>✦</span>'">
+                    <img src="heart6.png" alt="EchoDream" onerror="this.style.display='none';this.parentElement.innerHTML='<span style=color:#f08080;font-size:1.5rem;>✦</span>'">
                 </div>
                 <span class="logo-text">
-                    <span class="dream">Mea's</span>
-                    <span class="studio">Editing Portfolio</span>
+                    <span class="echo">Echo</span><span class="dream">Dream</span><span class="dot">.</span><span class="studio">Studio</span>
                 </span>
             </a>
             <nav class="nav-links" id="main-nav">
@@ -254,22 +252,22 @@
     <script>
         // [All the same JavaScript from previous version - BGM, sparkles, cursor, etc. unchanged]
 
-        // Updated video data with embedded YouTube references
+        // Updated video data with reference video links
         const editingVideos = [
-            { title: "Game Trailer Edit", desc: "Cinematic pacing with color grading and sound design.", tags: ["Premiere Pro", "Color Grade"], premiere: true, videoId: "VIDEO_ID_1" },
-            { title: "Devlog Highlights", desc: "Engaging cuts with motion graphics and transitions.", tags: ["Premiere Pro", "Motion Graphics"], premiere: true, videoId: "VIDEO_ID_2" },
-            { title: "Gameplay Montage", desc: "High-energy edit with speed ramps and beat sync.", tags: ["Premiere Pro", "Speed Ramps"], premiere: true, videoId: "VIDEO_ID_3" },
-            { title: "Social Media Pack", desc: "Platform-optimized vertical content.", tags: ["Premiere Pro", "Social Media"], premiere: true, videoId: "VIDEO_ID_4" },
-            { title: "Kickstarter Video", desc: "Persuasive edit with call-to-action.", tags: ["Premiere Pro", "Marketing"], premiere: true, videoId: "VIDEO_ID_5" },
-            { title: "Music Video Collab", desc: "Rhythm-based editing for indie artist.", tags: ["Premiere Pro", "Music Video"], premiere: false, videoId: "VIDEO_ID_6" }
+            { title: "Game Trailer Edit", desc: "Cinematic pacing with color grading and sound design.", tags: ["Premiere Pro", "Color Grade"], premiere: true, videoUrl: "https://www.youtube.com/watch?v=YOUR_VIDEO_ID_1" },
+            { title: "Devlog Highlights", desc: "Engaging cuts with motion graphics and transitions.", tags: ["Premiere Pro", "Motion Graphics"], premiere: true, videoUrl: "https://www.youtube.com/watch?v=YOUR_VIDEO_ID_2" },
+            { title: "Gameplay Montage", desc: "High-energy edit with speed ramps and beat sync.", tags: ["Premiere Pro", "Speed Ramps"], premiere: true, videoUrl: "https://www.youtube.com/watch?v=YOUR_VIDEO_ID_3" },
+            { title: "Social Media Pack", desc: "Platform-optimized vertical content.", tags: ["Premiere Pro", "Social Media"], premiere: true, videoUrl: "https://www.youtube.com/watch?v=YOUR_VIDEO_ID_4" },
+            { title: "Kickstarter Video", desc: "Persuasive edit with call-to-action.", tags: ["Premiere Pro", "Marketing"], premiere: true, videoUrl: "https://www.youtube.com/watch?v=YOUR_VIDEO_ID_5" },
+            { title: "Music Video Collab", desc: "Rhythm-based editing for indie artist.", tags: ["Premiere Pro", "Music Video"], premiere: false, videoUrl: "https://www.youtube.com/watch?v=YOUR_VIDEO_ID_6" }
         ];
 
         function renderVideos() {
             const grid = document.getElementById('videoGrid');
             grid.innerHTML = editingVideos.map(v => `
-                <div class="video-card">
+                <div class="video-card" onclick="window.open('${v.videoUrl}', '_blank')">
                     <div class="video-thumb">
-                        <iframe src="https://www.youtube.com/embed/${v.videoId}?autoplay=0&mute=1&controls=0&loop=1&playlist=${v.videoId}&rel=0&showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                        <span>✦</span>
                         <div class="play-overlay">▶</div>
                     </div>
                     <div class="video-info">
